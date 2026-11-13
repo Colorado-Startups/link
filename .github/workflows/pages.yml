@@ -4,7 +4,7 @@ name: pages
 # Consumption page, built by Git Crafter's actions/pages from quality/process/config.json and quality/config.json and
 # published to GitHub Pages. Each step names its action by full version tag, locked to a commit in
 # .github/workflows/actions.lock (gh actions-lock; Git Crafter templates/ci/DECISIONS.md, 2026-11-10). actions/pages
-# stays a full SHA: the lockfile records its repo, not its subpath, so ci-standard's pinned rule cannot match it.
+# is named by tag like the rest; .github/ci-standard.json excepts it from the pinned rule, which cannot read subpaths.
 # Dependabot's github-actions entry bumps every pin. A pull request builds the pages and runs the docs.unmapped gate, so its trigger lists the
 # doc globs (every Link doc is a .md file); only a push to main publishes.
 on:
@@ -51,7 +51,7 @@ jobs:
           node-version: 26
           cache: npm
 
-      - uses: SoulCraft-Org/git-crafter/actions/pages@a9d6b45b7e5ac54091123e2cda1efcfcd2f63696 # v7.0.0
+      - uses: SoulCraft-Org/git-crafter/actions/pages@v7.0.0
         with:
           pages: process quality
           config: quality/process/config.json

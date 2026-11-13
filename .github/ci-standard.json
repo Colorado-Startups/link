@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "$comment": "Link's written exceptions to the Git Crafter CI standard (tools/ci_standard.py). Both steps are locked in actions.lock (gh actions-lock --verify: all 3 workflows valid, 2026-11-13), but the lockfile records owner/repo@ref without the action's subpath, so the pinned rule cannot match them. A full SHA instead breaks the runner's lockfile match (startup_failure, run 43508171838). Drop these once Git Crafter's pinned rule reads subpaths.",
+  "exceptions": {
+    "pages.yml/build": {"rules": ["pinned"], "why": "SoulCraft-Org/git-crafter/actions/pages@v7.0.0 is locked in actions.lock; the rule cannot match a subpath"},
+    "scorecard.yml/analysis": {"rules": ["pinned"], "why": "github/codeql-action/upload-sarif@v4.39.3 is locked in actions.lock; the rule cannot match a subpath"}
+  }
+}
