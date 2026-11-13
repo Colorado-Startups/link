@@ -1,21 +1,31 @@
 // SPDX-License-Identifier: Apache-2.0
 // A small RFC 4180 CSV reader: quoted fields may hold commas, doubled quotes and line breaks.
 
+/** The text of a quoted run that starts at `start`, just after its opening quote, and the index after its closing quote. */
+function readQuoted(src: string, start: number): [string, number] {
+  let text = '';
+  let i = start;
+  for (; i < src.length; i++) {
+    if (src[i] !== '"') text += src[i];
+    else if (src[i + 1] === '"') (text += '"', i++);
+    else break;
+  }
+  return [text, i + 1];
+}
+
 /** Every row of `text` as an array of cells. Handles a BOM, CRLF and a missing final newline. */
 export function parseCsv(text: string): string[][] {
   const rows: string[][] = [];
   let row: string[] = [];
   let cell = '';
-  let quoted = false;
   const src = text.replace(/^﻿/, '');
   for (let i = 0; i < src.length; i++) {
     const c = src[i];
-    if (quoted) {
-      if (c === '"' && src[i + 1] === '"') (cell += '"', i++);
-      else if (c === '"') quoted = false;
-      else cell += c;
-    } else if (c === '"') quoted = true;
-    else if (c === ',') (row.push(cell), (cell = ''));
+    if (c === '"') {
+      const [quoted, next] = readQuoted(src, i + 1);
+      cell += quoted;
+      i = next - 1;
+    } else if (c === ',') (row.push(cell), (cell = ''));
     else if (c === '\n' || c === '\r') {
       if (c === '\r' && src[i + 1] === '\n') i++;
       row.push(cell);

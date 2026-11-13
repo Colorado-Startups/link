@@ -42,6 +42,64 @@ export function refuseToken(env: Record<string, string | undefined>): void {
   if (env.LINKEDIN_ACCESS_TOKEN) throw new LinkError(TOKEN_IN_SERVER_ENV);
 }
 
+/** What the helper wrote on stdout, parsed; empty when there was no JSON, so the exit code alone decides. */
+function helperOutput(stdout: string): Partial<HelperResult> & { error?: unknown } {
+  try {
+    return JSON.parse(stdout) ?? {};
+  } catch {
+    return {};
+  }
+}
+
+/** Starts the helper `command` without a shell, writes `spec` to its stdin, and returns its exit code and stdout. */
+function runHelper(command: string[], spec: Spec, env: Record<string, string | undefined>) {
+  return new Promise<{ code: number | null; stdout: string }>((resolve) => {
+    const child = spawn(command[0], command.slice(1), { stdio: ['pipe', 'pipe', 'ignore'], env: childEnv(env) });
+    let out = '';
+    child.stdout.setEncoding('utf8');
+    child.stdout.on('data', (chunk: string) => (out += chunk));
+    child.on('error', () => resolve({ code: null, stdout: '' }));
+    child.on('close', (exit) => resolve({ code: exit, stdout: out }));
+    // A helper that exits before reading its input is reported by its exit code, not by this pipe.
+    child.stdin.on('error', () => {});
+    child.stdin.end(JSON.stringify(spec));
+  });
+}
+
+/** The result of a helper that exited 0, or a LinkError when it printed no status. */
+function helperAnswer(result: Partial<HelperResult>, spec: Spec): HelperResult {
+  if (typeof result.status !== 'number') {
+    throw new LinkError(`The LinkedIn helper returned no result for ${where(spec)}. Check the profile before trying again.`);
+  }
+  return { status: result.status, headers: result.headers ?? {}, body: result.body ?? null };
+}
+
+/** The helper's answer for its exit code: the result on 0, otherwise a LinkError that names what to check. */
+function helperExit(code: number | null, result: Partial<HelperResult> & { error?: unknown }, spec: Spec): HelperResult {
+  switch (code) {
+    case 0:
+      return helperAnswer(result, spec);
+    case 2:
+      throw new LinkError(
+        `The LinkedIn helper refused ${where(spec)}: ${String(result.error ?? 'no reason given').slice(0, 300)}.`,
+      );
+    case 3:
+      throw new LinkError('You cancelled in the approval dialog. Nothing was sent.');
+    case 4:
+      throw new LinkError(TOKEN_MISSING);
+    case 5:
+      throw new LinkError(
+        `Could not reach LinkedIn (${where(spec)}). Check the network. If this was the post itself, check the profile before trying again.`,
+      );
+    case null:
+      throw new LinkError('Could not start the LinkedIn helper. Check that the command in LINK_HELPER_CMD exists.');
+    default:
+      throw new LinkError(
+        `The LinkedIn helper command failed (exit ${code}). Check LINK_HELPER_CMD and that the token is stored.`,
+      );
+  }
+}
+
 /**
  * The default transport: runs the LINK_HELPER_CMD command without a shell, writes the spec to its stdin, and reads its
  * one JSON result from stdout. The helper's stderr is dropped, so nothing it prints there can reach a result or a log.
@@ -55,50 +113,8 @@ export function helperTransport(
   return async (spec) => {
     refuseToken(env);
     const command = helperCommand(raw);
-    const { code, stdout } = await new Promise<{ code: number | null; stdout: string }>((resolve) => {
-      const child = spawn(command[0], command.slice(1), { stdio: ['pipe', 'pipe', 'ignore'], env: childEnv(env) });
-      let out = '';
-      child.stdout.setEncoding('utf8');
-      child.stdout.on('data', (chunk: string) => (out += chunk));
-      child.on('error', () => resolve({ code: null, stdout: '' }));
-      child.on('close', (exit) => resolve({ code: exit, stdout: out }));
-      // A helper that exits before reading its input is reported by its exit code, not by this pipe.
-      child.stdin.on('error', () => {});
-      child.stdin.end(JSON.stringify(spec));
-    });
-    let result: Partial<HelperResult> & { error?: unknown } = {};
-    try {
-      result = JSON.parse(stdout) ?? {};
-    } catch {
-      // No JSON on stdout: the exit code alone decides.
-    }
-    switch (code) {
-      case 0:
-        if (typeof result.status === 'number') {
-          return { status: result.status, headers: result.headers ?? {}, body: result.body ?? null };
-        }
-        throw new LinkError(
-          `The LinkedIn helper returned no result for ${where(spec)}. Check the profile before trying again.`,
-        );
-      case 2:
-        throw new LinkError(
-          `The LinkedIn helper refused ${where(spec)}: ${String(result.error ?? 'no reason given').slice(0, 300)}.`,
-        );
-      case 3:
-        throw new LinkError('You cancelled in the approval dialog. Nothing was sent.');
-      case 4:
-        throw new LinkError(TOKEN_MISSING);
-      case 5:
-        throw new LinkError(
-          `Could not reach LinkedIn (${where(spec)}). Check the network. If this was the post itself, check the profile before trying again.`,
-        );
-      case null:
-        throw new LinkError('Could not start the LinkedIn helper. Check that the command in LINK_HELPER_CMD exists.');
-      default:
-        throw new LinkError(
-          `The LinkedIn helper command failed (exit ${code}). Check LINK_HELPER_CMD and that the token is stored.`,
-        );
-    }
+    const { code, stdout } = await runHelper(command, spec, env);
+    return helperExit(code, helperOutput(stdout), spec);
   };
 }
 

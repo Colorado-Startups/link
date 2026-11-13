@@ -1,12 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
 // comment_create: a comment on a post, or a reply under one comment, as the signed-in member, through the older
 // /v2/socialActions endpoint. Where LinkedIn refuses that endpoint, the text goes on the clipboard for the member to paste.
-import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { LinkError, type Config, type Transport } from './core.ts';
 import type { Desk } from './desk.ts';
-import { appendLedger } from './ledger.ts';
+import { recordLedger } from './ledger.ts';
 import { API, apiHeaders, openSession, whoAmI, type Reply } from './session.ts';
 
 const POST = /urn:li:(?:share|ugcPost|activity):\d+/;
@@ -39,6 +38,37 @@ export interface CommentInput {
   parent?: string;
 }
 
+/** `text` URL-decoded, or as it is when it is not encoded. */
+function decoded(text: string): string {
+  try {
+    return decodeURIComponent(text);
+  } catch {
+    return text;
+  }
+}
+
+/** The post URN and the parent comment URN (undefined for a top-level comment) that `input` names. */
+function targetOf(input: CommentInput): { post: string; parent: string | undefined } {
+  const link = decoded(input.post);
+  const post = POST.exec(link)?.[0];
+  if (!post) throw new LinkError('post must be a post URN (urn:li:activity:, urn:li:share: or urn:li:ugcPost: and digits) or a post URL that holds one.');
+  // A comment or reply link carries its own parent, so one pasted link is enough to answer a comment.
+  const named = input.parent ?? commentFromLink(link);
+  if (named === undefined) return { post, parent: undefined };
+  const m = COMMENT.exec(named.trim());
+  if (!m) throw new LinkError('parent must be a comment URN, for example urn:li:comment:(urn:li:activity:123,456).');
+  return { post, parent: `urn:li:comment:(urn:li:${m[1]}:${m[2]},${m[3]})` };
+}
+
+/** The answer when the comment is left to the member: its text on the clipboard and the post open, unless it is a dry run. */
+async function byHand(config: Config, desk: Desk, text: string, url: string, reason: string) {
+  if (!config.dryRun) {
+    await desk.copy(text);
+    await desk.open(url);
+  }
+  return { sent: false, reason, opened: url, next: 'Press Cmd+V in the comment box, read it, press Enter.' };
+}
+
 /**
  * Comments on a post, or replies under one comment, as the signed-in member, through the older
  * /v2/socialActions/{urn}/comments endpoint (comments-api, li-lms-2026-10, read 2026-11-13). This app's products list
@@ -47,32 +77,12 @@ export interface CommentInput {
  * format. Live, a sent comment appends a ledger line; a dry run returns the requests and touches nothing.
  */
 export async function commentCreate(input: CommentInput, config: Config, transport: Transport, desk: Desk, now: Date = new Date()) {
-  let decoded = input.post;
-  try {
-    decoded = decodeURIComponent(input.post);
-  } catch {
-    // Not encoded: used as it is.
-  }
-  const post = POST.exec(decoded)?.[0];
-  if (!post) throw new LinkError('post must be a post URN (urn:li:activity:, urn:li:share: or urn:li:ugcPost: and digits) or a post URL that holds one.');
-  let parent: string | undefined;
-  // A comment or reply link carries its own parent, so one pasted link is enough to answer a comment.
-  const named = input.parent ?? commentFromLink(decoded);
-  if (named !== undefined) {
-    const m = COMMENT.exec(named.trim());
-    if (!m) throw new LinkError('parent must be a comment URN, for example urn:li:comment:(urn:li:activity:123,456).');
-    parent = `urn:li:comment:(urn:li:${m[1]}:${m[2]},${m[3]})`;
-  }
+  const { post, parent } = targetOf(input);
   const url = `https://www.linkedin.com/feed/update/${post}/`;
   const refused = join(config.home, 'comments-api-refused');
-  const byHand = async (reason: string) => {
-    if (!config.dryRun) {
-      await desk.copy(input.text);
-      await desk.open(url);
-    }
-    return { sent: false, reason, opened: url, next: 'Press Cmd+V in the comment box, read it, press Enter.' };
-  };
-  if (existsSync(refused)) return byHand(`LinkedIn refused the comments endpoint before. Delete ${refused} to try it again.`);
+  if (existsSync(refused)) {
+    return byHand(config, desk, input.text, url, `LinkedIn refused the comments endpoint before. Delete ${refused} to try it again.`);
+  }
   const session = openSession(config, transport);
   const { author } = await whoAmI(session);
   let sent: Reply;
@@ -87,18 +97,10 @@ export async function commentCreate(input: CommentInput, config: Config, transpo
     if (!(error instanceof LinkError) || error.status !== 403) throw error;
     mkdirSync(config.home, { recursive: true, mode: 0o700 });
     writeFileSync(refused, `${now.toISOString()}\n`, { mode: 0o600 });
-    return byHand('LinkedIn refused the comments endpoint for this app (403).');
+    return byHand(config, desk, input.text, url, 'LinkedIn refused the comments endpoint for this app (403).');
   }
   if (session.planned) return { dry_run: true, requests: session.planned };
-  let ledger = 'written';
-  try {
-    appendLedger(config.home, {
-      time: now.toISOString(), kind: 'comment', urn: sent.id ?? '', url, chars: input.text.length,
-      sha256: createHash('sha256').update(input.text).digest('hex'), media: null,
-    });
-  } catch {
-    ledger = `not written: could not append to ${join(config.home, 'ledger.jsonl')}`;
-  }
+  const entry = { time: now.toISOString(), kind: 'comment' as const, urn: sent.id ?? '', url, media: null };
+  const ledger = recordLedger(config.home, entry, input.text);
   return { sent: true, comment: sent.id, url, ledger };
 }
-
