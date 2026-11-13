@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
 // archive_load: reads a LinkedIn data export (the .zip or the unpacked folder) once, rates every connection and writes
-// LINK_HOME/connections.json (600). It reads local files only. A re-load keeps the owner's marks and states by URL.
+// LINK_HOME/connections.json and inbox.json (600). It reads local files only. A re-load keeps the owner's marks and states by URL.
 import { execFile } from 'node:child_process';
 import { chmodSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { parseCsv, records } from './csv.ts';
+import { waitingThreads, writeInbox } from './inbox.ts';
 import { childEnv, LinkError, type Config } from './linkedin.ts';
 import { hasWord, loadKeep, loadRules, normUrl, rate, type Row } from './rater.ts';
 
@@ -102,6 +103,9 @@ export async function archiveLoad(input: { path: string }, config: Config, env: 
     });
   }
 
+  const inbox = waitingThreads(threads, (m) => keyOf(m) === owner);
+  writeInbox(config, inbox);
+
   // Endorsements and recommendations, either way: any profile URL in those files, and names from first/last columns.
   const endorsed = new Set<string>();
   for (const [name, path] of files) {
@@ -144,5 +148,5 @@ export async function archiveLoad(input: { path: string }, config: Config, env: 
   const tally = (key: 'tier' | 'reason') => out.reduce<Record<string, number>>((n, c) => ((n[c[key]] = (n[c[key]] ?? 0) + 1), n), {});
   dates.push(...out.map((c) => c.connected));
   const seen = dates.filter(Boolean).sort();
-  return { connections: out.length, by_tier: tally('tier'), by_reason: tally('reason'), from: seen[0] ?? null, to: seen.at(-1) ?? null, owner_found: owner !== '' };
+  return { connections: out.length, by_tier: tally('tier'), by_reason: tally('reason'), from: seen[0] ?? null, to: seen.at(-1) ?? null, owner_found: owner !== '', inbox_waiting: inbox.length };
 }

@@ -71,7 +71,7 @@ before(async () => {
   ledger = jsonLines(join(dir, 'home', 'ledger.jsonl'));
 }, { timeout: 20_000 });
 
-test('over stdio the server answers initialize, then tools/list returns exactly the seven tools', () => {
+test('over stdio the server answers initialize, then tools/list returns exactly the ten tools', () => {
   assert.equal(initialize.result.protocolVersion, '2025-11-25');
   assert.equal(initialize.result.serverInfo.name, 'link');
   assert.deepEqual(
@@ -81,7 +81,7 @@ test('over stdio the server answers initialize, then tools/list returns exactly 
       { name: 'post_publish', annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: true } },
     ],
   );
-  assert.equal(tools.result.tools.length, 7);
+  assert.equal(tools.result.tools.length, 10);
 });
 
 test('a text post: two specs reach the helper, one ledger line, and every stdout line is JSON-RPC', () => {
