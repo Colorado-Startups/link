@@ -54,7 +54,7 @@ test('inbox_next: threads whose last message is not yours, newest first, last 3 
 });
 
 test('inbox_mark: done and skip come back on a newer message, spam does not, and marks survive a re-load', async () => {
-  const { dir, load, tool } = setup();
+  const { dir, load, config, tool } = setup();
   load();
   await tool('archive_load', { path: dir });
   assert.equal((await tool('inbox_mark', { thread: 'c2', action: 'done' })).json.waiting, 1);
@@ -65,6 +65,8 @@ test('inbox_mark: done and skip come back on a newer message, spam does not, and
   await tool('archive_load', { path: dir });
   assert.deepEqual((await tool('inbox_next')).json.threads.map((t: { id: string }) => t.id), ['c2']);
   assert.equal((await tool('inbox_mark', { thread: 'zz', action: 'done' })).isError, true);
+  writeFileSync(join(config.home, 'inbox-marks.json'), '{broken');
+  assert.match((await tool('inbox_mark', { thread: 'c2', action: 'done' })).text, /not readable JSON/);
 });
 
 test('reply_open copies and opens, falls back to messaging search, honours dry run and the halt file', async () => {
