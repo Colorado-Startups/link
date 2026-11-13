@@ -2,6 +2,11 @@
 
 macOS only. You create your own LinkedIn app and are its developer under LinkedIn's API Terms. Not affiliated with LinkedIn or Anthropic.
 
+```mermaid
+flowchart LR
+  I[install + sudo ./install.sh] --> A[LinkedIn app + 2 products] --> T[token] --> K[link-token → Keychain] --> H[Claude host config] --> S[link_status ✅]
+```
+
 | Step | Do |
 | --- | --- |
 | 1. Install | Node 26 or newer. `git clone https://github.com/Colorado-Startups/link && cd link && npm ci` |
