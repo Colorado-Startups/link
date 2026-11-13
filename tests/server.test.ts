@@ -9,16 +9,16 @@ import { join } from 'node:path';
 import { POST_URN, fakeLinkedIn, liveConfig, reply } from './fake-linkedin.ts';
 import { call, rpc } from './rpc.ts';
 
-test('lists exactly the ten tools, each with a title, a description and its annotations', async () => {
+test('lists exactly the eleven tools, each with a title, a description and its annotations', async () => {
   const out = await rpc(liveConfig(), fakeLinkedIn().transport, 'tools/list');
   const tools = out.result.tools as { name: string; title: string; description: string; annotations: Record<string, unknown> }[];
-  assert.deepEqual(tools.map((tool) => tool.name), ['link_status', 'post_publish', 'archive_load', 'connections_list', 'connections_mark', 'connections_next', 'connections_check', 'inbox_next', 'inbox_mark', 'reply_open']);
+  assert.deepEqual(tools.map((tool) => tool.name), ['link_status', 'post_publish', 'comment_create', 'archive_load', 'connections_list', 'connections_mark', 'connections_next', 'connections_check', 'inbox_next', 'inbox_mark', 'reply_open']);
   for (const tool of tools) {
     assert.ok(tool.title, `${tool.name} has a title`);
     assert.ok(tool.description.length > 40, `${tool.name} has a description`);
   }
   const [status, publish] = tools;
-  for (const tool of tools.slice(2, -1)) assert.equal(tool.annotations.openWorldHint, false, `${tool.name} does not touch LinkedIn`);
+  for (const tool of tools.slice(3, -1)) assert.equal(tool.annotations.openWorldHint, false, `${tool.name} does not touch LinkedIn`);
   assert.deepEqual(status.annotations, { readOnlyHint: true });
   assert.deepEqual(publish.annotations, { readOnlyHint: false, destructiveHint: false, openWorldHint: true });
 });

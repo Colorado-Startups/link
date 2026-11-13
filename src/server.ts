@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
-// The Link MCP server: two tools over stdio. link_status reads; post_publish writes to LinkedIn as the signed-in
-// member. Every request goes through a transport, by default the command in LINK_HELPER_CMD, which starts the trusted
+// The Link MCP server over stdio. link_status reads; post_publish and comment_create write to LinkedIn as the
+// signed-in member. Every request goes through a transport, by default the command in LINK_HELPER_CMD, which starts the trusted
 // helper. The helper receives the token from the process that starts it. In the supported setup that is a key tool,
 // so the token goes from the Keychain to the key tool to the helper and never enters this server. Two rules hold in
 // the code. Every tool handler first calls refuseToken: with a non-empty LINKEDIN_ACCESS_TOKEN in the server's own
@@ -17,7 +17,7 @@ import { macDesk, type Desk } from './desk.ts';
 import { inboxMark, inboxNext, replyOpen } from './inbox.ts';
 import { connectionsCheck, connectionsList, connectionsMark, connectionsNext, refuseWhileHalted } from './connections.ts';
 import { runGates } from './gates.ts';
-import { configFrom, helperTransport, LinkError, linkStatus, publishPost, refuseToken, type Config, type Transport } from './linkedin.ts';
+import { commentCreate, configFrom, helperTransport, LinkError, linkStatus, publishPost, refuseToken, type Config, type Transport } from './linkedin.ts';
 
 const Tier = z.enum(['PROTECTED', 'KEEP', 'REVIEW', 'REMOVE']);
 
@@ -104,6 +104,27 @@ export function buildServer(config: Config, options: { transport?: Transport; en
         // Gates first, live or dry: a blocked post never reaches the helper or its approval dialog.
         const notes = await runGates(config.gates, `${config.gatePrefix}post_publish`, input, env);
         return { ...(await publishPost(input, config, transport)), ...notes };
+      }),
+  );
+
+  server.registerTool(
+    'comment_create',
+    {
+      title: 'Comment on a LinkedIn post',
+      description:
+        'Comments on one post, or replies under one comment, as the signed-in member, through LinkedIn\'s /v2/socialActions endpoint. The pre-publish gates run first and can block it; the trusted helper then shows the comment in a dialog and sends it only on a yes. If LinkedIn refuses the endpoint (403), it and every later call put the text on the clipboard and open the post, for the member to paste and send. Stops while the halt file exists. With LINK_DRY_RUN=1 it sends nothing and returns the requests.',
+      inputSchema: z.strictObject({
+        post: z.string().min(1).describe('The post: its URN (urn:li:activity:..., urn:li:share:... or urn:li:ugcPost:...) or its URL.'),
+        text: z.string().min(1).max(1250).describe('The comment, as plain text, up to 1,250 characters.'),
+        parent: z.string().min(1).optional().describe('To reply under a comment: its URN, urn:li:comment:(urn:li:activity:...,...).'),
+      }),
+      annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: true },
+    },
+    (input) =>
+      run(env, async () => {
+        refuseWhileHalted(env, config);
+        const notes = await runGates(config.gates, `${config.gatePrefix}comment_create`, input, env);
+        return { ...(await commentCreate(input, config, transport, desk)), ...notes };
       }),
   );
 

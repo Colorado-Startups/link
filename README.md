@@ -18,6 +18,7 @@ Not affiliated with LinkedIn or Anthropic.
 | --- | --- | --- |
 | `link_status` | Read | Member name, author URN, whether the token works, pinned API version, dry-run state, last 5 ledger lines |
 | `post_publish` | Write | Publishes text, a link, one image, or one PDF (a carousel) on your own profile, after the dialog. |
+| `comment_create` | Write | Comments on a post or replies under a comment, after the dialog. If LinkedIn refuses the endpoint, the text goes to the clipboard and the post opens for you to paste |
 | `archive_load` | Local | Reads your LinkedIn data export, rates every connection and finds the threads waiting on you |
 | `connections_list`, `connections_mark`, `connections_next`, `connections_check` | Local | Paged cleanup of connections: list, mark, next to remove at a safe pace, check a profile before removal |
 | `inbox_next` | Local | Threads whose last message is not yours, newest first, with the last 3 messages as quoted data |
