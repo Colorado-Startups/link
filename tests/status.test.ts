@@ -5,7 +5,8 @@ import assert from 'node:assert/strict';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { LinkError } from '../src/core.ts';
-import { API_VERSION, helperTransport, linkStatus } from '../src/linkedin.ts';
+import { helperTransport, linkStatus } from '../src/linkedin.ts';
+import { API_VERSION } from '../src/session.ts';
 import { AUTHOR, fakeLinkedIn, liveConfig, reply } from './fake-linkedin.ts';
 
 test('a working token: name, author URN, version, dry-run off and an empty ledger', async () => {
