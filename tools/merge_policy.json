@@ -1,0 +1,129 @@
+{
+  "_README": [
+    "Link's AI merge policy for tools/merge_policy.py, from Git Crafter templates/open/merge_policy.json.",
+    "An outside PR may merge with no maintainer only when it changes docs/**/*.md alone.",
+    "src/, trusted/, install.sh, skills/ and .claude-plugin/ run or instruct agents, so they are maintainer_only."
+  ],
+  "maintainer_only": [
+    ".github/**",
+    ".githooks/**",
+    ".husky/**",
+    ".claude/**",
+    ".devcontainer/**",
+    "tools/**",
+    "scripts/**",
+    "**/migrations/**",
+    "**/package.json",
+    "**/package-lock.json",
+    "**/npm-shrinkwrap.json",
+    "**/pnpm-lock.yaml",
+    "**/yarn.lock",
+    "**/pyproject.toml",
+    "**/uv.lock",
+    "**/requirements*.txt",
+    "**/Pipfile*",
+    "**/Dockerfile*",
+    "**/*.config.js",
+    "**/*.config.cjs",
+    "**/*.config.mjs",
+    "**/*.config.ts",
+    "**/wrangler.toml",
+    "**/wrangler.json",
+    "**/wrangler.jsonc",
+    "**/.npmrc",
+    "**/.nvmrc",
+    "**/.gitignore",
+    "**/.gitattributes",
+    "**/.env*",
+    "merge_policy.json",
+    "LICENSE",
+    "NOTICE",
+    "CODEOWNERS",
+    "**/AGENTS.md",
+    "**/CLAUDE.md",
+    "GOVERNANCE.md",
+    "MAINTAINERS.md",
+    "SECURITY.md",
+    "CONTRIBUTING.md",
+    "**/_worker.js",
+    "**/_headers",
+    "**/_redirects",
+    "tests/**",
+    "**/*.test.*",
+    "**/conftest.py",
+    "**/*.svg",
+    "**/.claude/**",
+    "src/**",
+    "trusted/**",
+    "install.sh",
+    "skills/**",
+    ".claude-plugin/**",
+    "rules/**",
+    "templates/**",
+    "quality/**",
+    "labels.json"
+  ],
+  "ai_mergeable": [
+    "docs/**/*.md"
+  ],
+  "samples": {
+    "ai_mergeable": [
+      [
+        "docs/setup.md"
+      ],
+      [
+        "docs/connections.md",
+        "docs/setup.md"
+      ]
+    ],
+    "maintainer_only": [
+      [
+        ".github/workflows/ci.yml"
+      ],
+      [
+        "package.json"
+      ],
+      [
+        "CLAUDE.md"
+      ],
+      [
+        "tests/comments.test.ts"
+      ],
+      [
+        "trusted/link-token"
+      ],
+      [
+        "src/linkedin.ts"
+      ],
+      [
+        "skills/link-post/SKILL.md"
+      ],
+      [
+        "docs/setup.md",
+        "install.sh"
+      ]
+    ],
+    "default_deny": [
+      [
+        "README.md"
+      ],
+      [
+        "docs/run.sh"
+      ]
+    ],
+    "refused": [
+      [
+        "src/../.github/workflows/ci.yml"
+      ],
+      [
+        "/etc/hosts"
+      ],
+      [
+        "src//pages/x.md"
+      ],
+      [
+        "src\\pages\\x.md"
+      ]
+    ]
+  }
+}
