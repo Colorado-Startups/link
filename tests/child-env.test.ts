@@ -28,8 +28,8 @@ test('every place in src/ that starts a process passes childEnv(env) as its envi
         if (starts.test(line)) sites.push(`${file}:${index + 1}: ${line.trim()}`);
       });
   }
-  assert.deepEqual(sites.map((site) => site.split(':')[0]), ['archive.ts', 'gates.ts', 'linkedin.ts'], sites.join('\n'));
-  for (const site of sites) assert.ok(site.includes('env: childEnv(env)'), site);
+  assert.deepEqual(sites.map((site) => site.split(':')[0]), ['archive.ts', 'desk.ts', 'gates.ts', 'linkedin.ts'], sites.join('\n'));
+  for (const site of sites) assert.match(site, /env: (\{ \.\.\.)?childEnv\(env\)/, site);
 });
 
 test('with the token in the server environment, no tool starts a process, live or in a dry run', async () => {

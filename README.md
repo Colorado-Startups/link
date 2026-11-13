@@ -17,7 +17,12 @@ Not affiliated with LinkedIn or Anthropic.
 | Tool | Kind | Does |
 | --- | --- | --- |
 | `link_status` | Read | Member name, author URN, whether the token works, pinned API version, dry-run state, last 5 ledger lines |
-| `post_publish` | Write | Publishes text, a link, one image, or one PDF (a carousel) on your own profile, after the dialog. More is coming |
+| `post_publish` | Write | Publishes text, a link, one image, or one PDF (a carousel) on your own profile, after the dialog. |
+| `archive_load` | Local | Reads your LinkedIn data export, rates every connection and finds the threads waiting on you |
+| `connections_list`, `connections_mark`, `connections_next`, `connections_check` | Local | Paged cleanup of connections: list, mark, next to remove at a safe pace, check a profile before removal |
+| `inbox_next` | Local | Threads whose last message is not yours, newest first, with the last 3 messages as quoted data |
+| `inbox_mark` | Local | Marks a thread done, skip or spam |
+| `reply_open` | Mac | Puts your approved reply on the clipboard and opens the thread; you press Cmd+V and Enter. Link sends no message |
 
 `post_publish` input: `text` (required), `media` (absolute path to a `.pdf`, `.png`, `.jpg`, `.jpeg` or `.gif`), `title` (required for a PDF), `visibility` (`PUBLIC` or `CONNECTIONS`, default `PUBLIC`).
 
