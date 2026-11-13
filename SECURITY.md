@@ -8,6 +8,11 @@
 
 Please do not open a public issue. A maintainer replies.
 
+```mermaid
+flowchart LR
+  R[you] -->|private advisory| M[maintainer] --> F[fix in a private fork] --> P[release + advisory published]
+```
+
 ## How outside code is kept safe
 
 | Control | Where |

@@ -1,5 +1,10 @@
 # Rate and clean up your connections
 
+```mermaid
+flowchart LR
+  E[export zip] --> A[archive_load: rate] --> N[connections_next: pace] --> C[connections_check] -->|REMOVE| Y[you remove in LinkedIn] --> M[connections_mark]
+```
+
 Link rates your connections from your own LinkedIn data export (Settings, Data privacy, Get a copy of your data). It reads local files only, never talks to LinkedIn, and removes nothing. Tools: `archive_load`, `connections_list`, `connections_mark`, `connections_next`, `connections_check`.
 
 | # | Rule, first match wins | Tier, reason |
