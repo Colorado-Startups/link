@@ -18,7 +18,9 @@ import { inboxMark, inboxNext, replyOpen } from './inbox.ts';
 import { connectionsCheck, connectionsList, connectionsMark, connectionsNext, refuseWhileHalted } from './connections.ts';
 import { runGates } from './gates.ts';
 import { configFrom, LinkError, type Config, type Transport } from './core.ts';
-import { commentCreate, helperTransport, linkStatus, publishPost, refuseToken } from './linkedin.ts';
+import { commentCreate } from './comments.ts';
+import { helperTransport, linkStatus, refuseToken } from './linkedin.ts';
+import { publishPost } from './publish.ts';
 
 const Tier = z.enum(['PROTECTED', 'KEEP', 'REVIEW', 'REMOVE']);
 

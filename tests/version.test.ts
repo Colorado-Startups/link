@@ -4,7 +4,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import pinned from '../quality/api-version.json' with { type: 'json' };
-import { API_VERSION } from '../src/linkedin.ts';
+import { API_VERSION } from '../src/session.ts';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 

@@ -3,7 +3,7 @@
 // read 2026-11-12): every reserved character is escaped with a backslash, and a hashtag is sent as `#word`.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { escapeLittle } from '../src/linkedin.ts';
+import { escapeLittle } from '../src/publish.ts';
 
 test('plain text passes through unchanged, line breaks and emoji included', () => {
   const text = 'Hello World.\n\nSecond line: 100% done, 2 + 2 = 4, "quoted" & café 🚀';
