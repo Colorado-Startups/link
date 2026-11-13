@@ -21,7 +21,7 @@ import { commentCreate, configFrom, helperTransport, LinkError, linkStatus, publ
 
 const Tier = z.enum(['PROTECTED', 'KEEP', 'REVIEW', 'REMOVE']);
 
-const VERSION = '0.1.0';
+const VERSION = '0.2.0';
 
 const PostInput = z.strictObject({
   text: z
@@ -68,7 +68,7 @@ async function run(env: Env, work: () => Promise<Record<string, unknown>>): Prom
 }
 
 /**
- * A server with both tools registered. `env` is the server's own environment, default `process.env`. `transport`
+ * A server with every Link tool registered. `env` is the server's own environment, default `process.env`. `transport`
  * carries every LinkedIn request, by default the helper command in `config.helper`; tests pass a fake.
  */
 export function buildServer(config: Config, options: { transport?: Transport; env?: Env; desk?: Desk } = {}): McpServer {
@@ -114,7 +114,7 @@ export function buildServer(config: Config, options: { transport?: Transport; en
       description:
         'Comments on one post, or replies under one comment, as the signed-in member, through LinkedIn\'s /v2/socialActions endpoint. The pre-publish gates run first and can block it; the trusted helper then shows the comment in a dialog and sends it only on a yes. If LinkedIn refuses the endpoint (403), it and every later call put the text on the clipboard and open the post, for the member to paste and send. Stops while the halt file exists. With LINK_DRY_RUN=1 it sends nothing and returns the requests.',
       inputSchema: z.strictObject({
-        post: z.string().min(1).describe('The post: its URN (urn:li:activity:..., urn:li:share:... or urn:li:ugcPost:...) or its URL.'),
+        post: z.string().min(1).describe('The post: its URN (urn:li:activity:..., urn:li:share:... or urn:li:ugcPost:...) or its URL. A comment or reply link from "Copy link to comment" also works: it replies under that comment, with no parent needed.'),
         text: z.string().min(1).max(1250).describe('The comment, as plain text, up to 1,250 characters.'),
         parent: z.string().min(1).optional().describe('To reply under a comment: its URN, urn:li:comment:(urn:li:activity:...,...).'),
       }),
@@ -166,7 +166,7 @@ export function buildServer(config: Config, options: { transport?: Transport; en
     {
       title: 'Mark a connection',
       description:
-        'Records the owner\'s decision for one connection: keep or remove overrides the rating; removed or skipped records what happened when a person removed it or passed it by in LinkedIn; warning records a LinkedIn warning and writes the halt file named by LINK_HALT_FILE, which stops connections_next and post_publish. It removes nothing on LinkedIn.',
+        'Records the owner\'s decision for one connection: keep or remove overrides the rating; removed or skipped records what happened when a person removed it or passed it by in LinkedIn; warning records a LinkedIn warning and writes the halt file named by LINK_HALT_FILE, which stops connections_next, post_publish, comment_create and reply_open. It removes nothing on LinkedIn.',
       inputSchema: z.strictObject({
         url,
         action: z.enum(['keep', 'remove', 'removed', 'skipped', 'warning']).describe('keep or remove: override the rating. removed or skipped: the outcome. warning: LinkedIn showed a warning.'),
