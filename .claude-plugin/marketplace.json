@@ -1,0 +1,16 @@
+{
+  "name": "link",
+  "owner": {
+    "name": "Colorado Startups"
+  },
+  "metadata": {
+    "description": "Link, by Colorado Startups: LinkedIn from Claude, every write approved by you."
+  },
+  "plugins": [
+    {
+      "name": "link",
+      "source": "./",
+      "description": "LinkedIn from Claude: posts, comments, inbox triage and connection cleanup, each one approved by you."
+    }
+  ]
+}
