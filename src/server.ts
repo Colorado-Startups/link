@@ -70,16 +70,23 @@ async function run(env: Env, work: () => Promise<Record<string, unknown>>): Prom
   }
 }
 
-/**
- * A server with every Link tool registered. `env` is the server's own environment, default `process.env`. `transport`
- * carries every LinkedIn request, by default the helper command in `config.helper`; tests pass a fake.
- */
-export function buildServer(config: Config, options: { transport?: Transport; env?: Env; desk?: Desk } = {}): McpServer {
-  const env = options.env ?? process.env;
-  const transport = options.transport ?? helperTransport(config.helper, env);
-  const desk = options.desk ?? macDesk(env);
-  const server = new McpServer({ name: 'link', title: 'Link', version: VERSION });
+// The connections tools read and write local files only. None of them sends anything to LinkedIn.
+const local = { openWorldHint: false, destructiveHint: false };
+const url = z.string().min(1).describe('The connection\'s LinkedIn profile URL, as in Connections.csv.');
+// The inbox: threads from the export. Only reply_open touches the Mac, and the member sends every reply.
+const thread = z.string().min(1).describe('The thread id, as inbox_next returns it (the export\'s CONVERSATION ID).');
 
+/** What every register function needs: the server to add tools to, and what the tool handlers read. */
+interface Deps {
+  server: McpServer;
+  config: Config;
+  transport: Transport;
+  env: Env;
+  desk: Desk;
+}
+
+/** Registers link_status and post_publish. */
+function registerPostTools({ server, config, transport, env }: Deps): void {
   server.registerTool(
     'link_status',
     {
@@ -109,7 +116,10 @@ export function buildServer(config: Config, options: { transport?: Transport; en
         return { ...(await publishPost(input, config, transport)), ...notes };
       }),
   );
+}
 
+/** Registers comment_create. */
+function registerCommentTool({ server, config, transport, env, desk }: Deps): void {
   server.registerTool(
     'comment_create',
     {
@@ -130,11 +140,10 @@ export function buildServer(config: Config, options: { transport?: Transport; en
         return { ...(await commentCreate(input, config, transport, desk)), ...notes };
       }),
   );
+}
 
-  // The connections tools: local files only. None of them sends anything to LinkedIn.
-  const local = { openWorldHint: false, destructiveHint: false };
-  const url = z.string().min(1).describe('The connection\'s LinkedIn profile URL, as in Connections.csv.');
-
+/** Registers archive_load and connections_list. */
+function registerArchiveTools({ server, config, env }: Deps): void {
   server.registerTool(
     'archive_load',
     {
@@ -163,7 +172,10 @@ export function buildServer(config: Config, options: { transport?: Transport; en
     },
     (input) => run(env, async () => connectionsList(input, config)),
   );
+}
 
+/** Registers connections_mark, connections_next and connections_check. */
+function registerConnectionTools({ server, config, env }: Deps): void {
   server.registerTool(
     'connections_mark',
     {
@@ -209,10 +221,10 @@ export function buildServer(config: Config, options: { transport?: Transport; en
     },
     (input) => run(env, async () => connectionsCheck(input, config, env)),
   );
+}
 
-  // The inbox: threads from the export. Only reply_open touches the Mac, and the member sends every reply.
-  const thread = z.string().min(1).describe('The thread id, as inbox_next returns it (the export\'s CONVERSATION ID).');
-
+/** Registers inbox_next, inbox_mark and reply_open. */
+function registerInboxTools({ server, config, env, desk }: Deps): void {
   server.registerTool(
     'inbox_next',
     {
@@ -248,7 +260,19 @@ export function buildServer(config: Config, options: { transport?: Transport; en
     },
     (input) => run(env, () => replyOpen(input, config, env, desk)),
   );
+}
 
+/**
+ * A server with every Link tool registered. `env` is the server's own environment, default `process.env`. `transport`
+ * carries every LinkedIn request, by default the helper command in `config.helper`; tests pass a fake.
+ */
+export function buildServer(config: Config, options: { transport?: Transport; env?: Env; desk?: Desk } = {}): McpServer {
+  const env = options.env ?? process.env;
+  const transport = options.transport ?? helperTransport(config.helper, env);
+  const desk = options.desk ?? macDesk(env);
+  const server = new McpServer({ name: 'link', title: 'Link', version: VERSION });
+  const deps: Deps = { server, config, transport, env, desk };
+  for (const register of [registerPostTools, registerCommentTool, registerArchiveTools, registerConnectionTools, registerInboxTools]) register(deps);
   return server;
 }
 

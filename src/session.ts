@@ -52,6 +52,7 @@ const DRY_REPLY: Reply = {
   },
 };
 
+/** Opens the session for one tool call: a dry run that collects specs, or a live one that sends them through `transport`. */
 export function openSession(config: Config, transport: Transport): Session {
   if (config.dryRun) {
     const planned: PlannedRequest[] = [];
