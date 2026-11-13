@@ -1,0 +1,43 @@
+{
+ "comment": "Link's Quality, Speed and Consumption config, from Git Crafter v5.0.1 templates/quality/config.json. Dropped: projects (no board), design and usability (no site), deploy (no deployment). The six Claude tabs come from the Claudius pack, pinned at a full commit SHA, named as [id, Name] pairs because actions/pages reads this list before it checks the pack out. Keys: Git Crafter quality/CONFIG.md.",
+ "tabs": [
+  "code",
+  "documentation",
+  "issues",
+  "pull-requests",
+  "actions",
+  "tests",
+  "security",
+  "insights",
+  "settings",
+  "credits",
+  "tools",
+  [
+   "claude",
+   "Claude"
+  ],
+  [
+   "claude-settings",
+   "Claude settings"
+  ],
+  [
+   "desktop-app",
+   "Claude desktop app"
+  ],
+  [
+   "blockers",
+   "Blockers"
+  ],
+  [
+   "tokens",
+   "Tokens"
+  ],
+  [
+   "instructions",
+   "Instructions"
+  ]
+ ],
+ "packs": [
+  "Colorado-Startups/claudius@25ff64c245bdeb543974acf1a19a76745758f5ed"
+ ]
+}

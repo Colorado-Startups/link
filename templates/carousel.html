@@ -1,0 +1,159 @@
+<!doctype html>
+<!--
+  SPDX-License-Identifier: Apache-2.0
+  A LinkedIn carousel: one .slide per PDF page, 1080 by 1350 px (4:5). System fonts only, no external assets.
+  Copy this file, replace the text, add or remove .slide sections, then print it to PDF with headless Chrome
+  (skills/link-post/SKILL.md has the command). Colours and type sizes are the variables under :root.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1080">
+<title>Carousel</title>
+<style>
+  @page { size: 1080px 1350px; margin: 0; }
+
+  :root {
+    --paper: #f6f4ef;
+    --ink: #16181d;
+    --muted: #5b6070;
+    --accent: #0a66c2;
+    --rule: #d9d5cb;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body { margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--sans);
+    color: var(--ink);
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    counter-reset: slide;
+  }
+
+  .slide {
+    width: 1080px;
+    height: 1350px;
+    padding: 104px 96px 88px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: var(--paper);
+    break-after: page;
+    counter-increment: slide;
+  }
+  .slide:last-child { break-after: auto; }
+
+  .kicker {
+    margin: 0 0 40px;
+    font-size: 30px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  h1, h2, p { margin: 0; }
+
+  h1 {
+    font-size: 112px;
+    line-height: 1.04;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    text-wrap: balance;
+  }
+
+  h2 {
+    font-size: 76px;
+    line-height: 1.1;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+
+  p {
+    margin-top: 40px;
+    font-size: 44px;
+    line-height: 1.36;
+    color: var(--muted);
+    text-wrap: pretty;
+  }
+
+  .number {
+    margin: 0 0 24px;
+    font-size: 200px;
+    line-height: 1;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* The foot of every slide: who it is from on the left, the page number on the right. */
+  .foot {
+    margin-top: auto;
+    padding-top: 32px;
+    border-top: 3px solid var(--rule);
+    display: flex;
+    justify-content: space-between;
+    font-size: 30px;
+    font-weight: 600;
+    color: var(--muted);
+  }
+  .foot::after { content: counter(slide, decimal-leading-zero); font-variant-numeric: tabular-nums; }
+
+  /* The first and last slides: dark, with the headline pushed to the lower half. */
+  .cover, .close { background: var(--ink); color: var(--paper); justify-content: flex-end; }
+  .cover p, .close p { color: #b9bdc9; }
+  .cover .kicker, .close .kicker { color: #70b5f9; }
+  .cover .foot, .close .foot { margin-top: 72px; border-top-color: #3a3f4c; color: #b9bdc9; }
+
+  /* On screen only: slides stacked with space between, so the file previews well in a browser. */
+  @media screen {
+    body { background: #c9c9c9; padding: 40px 0; }
+    .slide { margin: 0 auto 40px; box-shadow: 0 8px 40px rgb(0 0 0 / 0.25); }
+  }
+</style>
+</head>
+<body>
+
+<section class="slide cover">
+  <div class="kicker">Topic or series name</div>
+  <h1>The one idea this carousel proves</h1>
+  <p>A single line that says who it is for and what they will get.</p>
+  <div class="foot"><span>Your name</span></div>
+</section>
+
+<section class="slide">
+  <div class="number">1</div>
+  <h2>The first point, in one short line</h2>
+  <p>Two or three lines of support. One idea per slide reads well on a phone.</p>
+  <div class="foot"><span>Your name</span></div>
+</section>
+
+<section class="slide">
+  <div class="number">2</div>
+  <h2>The second point, in one short line</h2>
+  <p>Give a number, a source or an example. Keep the text large.</p>
+  <div class="foot"><span>Your name</span></div>
+</section>
+
+<section class="slide">
+  <div class="number">3</div>
+  <h2>The third point, in one short line</h2>
+  <p>Add a slide for each further point. Remove the ones you do not need.</p>
+  <div class="foot"><span>Your name</span></div>
+</section>
+
+<section class="slide close">
+  <div class="kicker">What to do next</div>
+  <h2>One clear ask for the reader</h2>
+  <p>Follow, comment, or visit a link written out in full.</p>
+  <div class="foot"><span>Your name</span></div>
+</section>
+
+</body>
+</html>

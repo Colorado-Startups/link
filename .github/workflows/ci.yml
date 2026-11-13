@@ -1,0 +1,32 @@
+name: ci
+
+# The Git Crafter CI standard (Git Crafter templates/ci/README.md): this repo calls Git Crafter's reusable workflow,
+# which runs each job on GitHub's standard hosted runners. It pins a Git Crafter release by full commit SHA with its
+# version comment; Dependabot's github-actions entry bumps it. Default workflow token only, read access.
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+# A newer push cancels a pull request's older run; a push to main always finishes.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  ci:
+    uses: SoulCraft-Org/git-crafter/.github/workflows/ci-standard.yml@8efee362526579f93e9537ef5944200908a68f67 # v5.0.1
+    with:
+      node-version: "26"
+      paths: |
+        src/**
+        trusted/**
+        tests/**
+        quality/**
+        package.json
+        package-lock.json
+      # The whole suite: Node's own test runner against a fake LinkedIn, seconds of work, no network.
+      short: npm test
