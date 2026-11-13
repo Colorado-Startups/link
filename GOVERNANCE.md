@@ -2,6 +2,11 @@
 
 The maintainer listed in [`MAINTAINERS.md`](MAINTAINERS.md) owns the project.
 
+```mermaid
+flowchart LR
+  D[Discussion idea] -->|maintainer| I[issue] --> P[pull request] -->|CI + DCO green| M[maintainer merges]
+```
+
 | Decision | Who decides |
 |---|---|
 | An idea becomes an issue | A maintainer, in Discussions |

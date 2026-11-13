@@ -1,5 +1,10 @@
 # Rate and clean up your connections
 
+```mermaid
+flowchart LR
+  E[export zip] --> A[archive_load: rate] --> N[connections_next: pace] --> C[connections_check] -->|REMOVE| Y[you remove in LinkedIn] --> M[connections_mark]
+```
+
 Link rates your connections from your own LinkedIn data export (Settings, Data privacy, Get a copy of your data). It reads local files only, never talks to LinkedIn, and removes nothing. Tools: `archive_load`, `connections_list`, `connections_mark`, `connections_next`, `connections_check`.
 
 | # | Rule, first match wins | Tier, reason |
@@ -24,7 +29,7 @@ Default word lists: `rules/rater.default.json`. `LINK_RATER` names a JSON overla
 | 4 to 7 | 50 | 25 |
 | 8 on | 80 | 40 |
 
-A sitting ends after 30 minutes idle. `connections_next` waits 15 to 45 seconds after the last removal. A `warning` mark writes `LINK_HALT_FILE`; while it exists, `connections_next` and `post_publish` refuse until you delete it.
+A sitting ends after 30 minutes idle. `connections_next` waits 15 to 45 seconds after the last removal. A `warning` mark writes `LINK_HALT_FILE`; while it exists, `connections_next`, `post_publish`, `comment_create` and `reply_open` refuse until you delete it.
 
 | Variable | Use |
 |---|---|

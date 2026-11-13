@@ -45,6 +45,22 @@ test('a reply under a comment targets the comment and names it as parentComment,
   assert.match((await tool({ post: 'https://example.com/post/1', text: 'x' })).text, /post must be/);
 });
 
+test('a comment link or a reply link alone answers the top-level comment; a mismatched link is refused', async () => {
+  const { linkedin, tool } = setup();
+  const top = 'urn:li:comment:(activity:7000000000000000002,7000000000000000003)';
+  const full = 'urn:li:comment:(urn:li:activity:7000000000000000002,7000000000000000003)';
+  const commentLink = `${POST_PAGE}?commentUrn=${encodeURIComponent(top)}&dashCommentUrn=x`;
+  const replyLink = `${commentLink}&replyUrn=${encodeURIComponent('urn:li:comment:(activity:7000000000000000002,7000000000000000004)')}`;
+  for (const post of [commentLink, replyLink]) {
+    const before = linkedin.calls.length;
+    await tool({ post, text: 'Thanks' });
+    assert.equal((linkedin.calls[before + 1].json as { parentComment: string }).parentComment, full);
+  }
+  const other = `${POST_PAGE}?commentUrn=${encodeURIComponent('urn:li:comment:(activity:7000000000000000099,7000000000000000003)')}`;
+  assert.match((await tool({ post: other, text: 'x' })).text, /another post/);
+  assert.equal(((await tool({ post: POST_PAGE, text: 'x' })).json as { sent: boolean }).sent, true, 'a post link with no comment still comments on the post');
+});
+
 test('on a 403 it copies and opens the post, and later calls skip the endpoint', async () => {
   const { linkedin, config, desk, tool } = setup({ 'POST /v2/socialActions/': () => reply(403, { message: 'Not enough permissions' }) });
   const first = (await tool({ post: POST, text: 'Agreed' })).json;
