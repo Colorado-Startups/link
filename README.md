@@ -36,7 +36,7 @@ Skills that drive each job: [link-post](skills/link-post/SKILL.md), [link-inbox]
 | Way | Do |
 | --- | --- |
 | Claude Code or Cowork | `/plugin install link --marketplace Colorado-Startups/link` |
-| By hand, any host | [docs/setup.md](docs/setup.md): `sudo ./install.sh`, a LinkedIn app, `link-token`, one config block |
+| By hand, any host | Node 26 or newer, `npm ci`, then [docs/setup.md](docs/setup.md): `sudo ./install.sh`, a LinkedIn app, `link-token`, one config block |
 | Rehearse | `LINK_DRY_RUN=1` returns the requests and sends nothing |
 
 ## Quality and process
