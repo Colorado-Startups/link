@@ -407,6 +407,26 @@ export async function publishPost(
 const POST = /urn:li:(?:share|ugcPost|activity):\d+/;
 const COMMENT = /^urn:li:comment:\((?:urn:li:)?(activity|ugcPost|share):(\d+),(\d+)\)$/;
 
+/**
+ * The comment a LinkedIn comment link points at, as the parent for a reply, or undefined when `link` names no comment.
+ * "Copy link to comment" gives `…/feed/update/urn:li:activity:P?commentUrn=urn:li:comment:(activity:P,C)`; a reply's
+ * link adds `&replyUrn=urn:li:comment:(activity:P,R)`. `link` arrives URL-decoded. Returns the URN in the short form
+ * COMMENT accepts; commentCreate expands it. Throws a LinkError when the link names a comment it cannot use.
+ */
+export function commentFromLink(link: string): string | undefined {
+  const query = link.includes('?') ? new URLSearchParams(link.slice(link.indexOf('?') + 1)) : undefined;
+  const comment = query?.get('commentUrn') ?? undefined;
+  const reply = query?.get('replyUrn') ?? undefined;
+  // LinkedIn nests one level: a reply's link still names its top-level comment, and that is the only valid parent.
+  const parent = comment ?? reply;
+  if (parent === undefined) return undefined;
+  const m = COMMENT.exec(parent.trim());
+  if (!m) throw new LinkError('The link names a comment Link cannot read. Pass the comment URN as parent instead.');
+  const post = POST.exec(link.slice(0, link.indexOf('?')))?.[0];
+  if (post && post !== `urn:li:${m[1]}:${m[2]}`) throw new LinkError('The link names a comment on another post.');
+  return parent;
+}
+
 /** What `comment_create` takes: the post (URN or URL), the text, and the comment it answers, if any. */
 export interface CommentInput {
   post: string;
@@ -431,8 +451,10 @@ export async function commentCreate(input: CommentInput, config: Config, transpo
   const post = POST.exec(decoded)?.[0];
   if (!post) throw new LinkError('post must be a post URN (urn:li:activity:, urn:li:share: or urn:li:ugcPost: and digits) or a post URL that holds one.');
   let parent: string | undefined;
-  if (input.parent !== undefined) {
-    const m = COMMENT.exec(input.parent.trim());
+  // A comment or reply link carries its own parent, so one pasted link is enough to answer a comment.
+  const named = input.parent ?? commentFromLink(decoded);
+  if (named !== undefined) {
+    const m = COMMENT.exec(named.trim());
     if (!m) throw new LinkError('parent must be a comment URN, for example urn:li:comment:(urn:li:activity:123,456).');
     parent = `urn:li:comment:(urn:li:${m[1]}:${m[2]},${m[3]})`;
   }

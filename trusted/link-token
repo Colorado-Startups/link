@@ -1,0 +1,12 @@
+#!/bin/sh
+# Stores a LinkedIn access token in your Keychain (service link-linkedin), from a hidden macOS dialog. Run it once,
+# then again every 60 days when LinkedIn's token expires. The token goes dialog -> this shell -> security's stdin:
+# never a command line, a file or the screen. LINK_OSASCRIPT and LINK_SECURITY exist for the tests only.
+set -eu
+[ "$(uname)" = Darwin ] || { echo "Link supports macOS only." >&2; exit 1; }
+ASK='display dialog "Paste your LinkedIn access token. Link keeps it in your Keychain as link-linkedin." default answer "" with hidden answer with title "Link" buttons {"Cancel", "Save"} default button "Save"'
+TOKEN="$("${LINK_OSASCRIPT:-/usr/bin/osascript}" -e "$ASK" -e 'text returned of result' 2>/dev/null)" || { echo "Cancelled: nothing stored." >&2; exit 1; }
+case "$TOKEN" in ''|*[!A-Za-z0-9._:+/=-]*) echo "That is not a LinkedIn token: nothing stored." >&2; exit 4 ;; esac
+case "$USER" in ''|*[!A-Za-z0-9._-]*) echo "Unsupported user name: nothing stored." >&2; exit 1 ;; esac
+printf 'add-generic-password -U -s link-linkedin -a %s -w %s\n' "$USER" "$TOKEN" | "${LINK_SECURITY:-/usr/bin/security}" -i >/dev/null
+echo "Stored. Ask Claude to call link_status."
