@@ -1,0 +1,7 @@
+[
+  {
+    "id": "security.claude_review_share",
+    "drop": true,
+    "goal_source": "Link, 2026-11-13: dropped, as the merging session reviews each pull request before it merges, so Link runs no claude-review.yml and spends no tokens on a second review. Undo: add the workflow and its subscription token, then delete this entry"
+  }
+]

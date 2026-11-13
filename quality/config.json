@@ -1,43 +1,27 @@
 {
- "comment": "Link's Quality, Speed and Consumption config, from Git Crafter v5.0.1 templates/quality/config.json. Dropped: projects (no board), design and usability (no site), deploy (no deployment). The six Claude tabs come from the Claudius pack, pinned at a full commit SHA, named as [id, Name] pairs because actions/pages reads this list before it checks the pack out. Keys: Git Crafter quality/CONFIG.md.",
+ "comment": "Link's Quality, Speed and Consumption config, from Git Crafter v7.0.0 templates/quality/config.json. Dropped: projects (no board) and pages (no website). Tests moved to actions and tools to dependabot in v7, so neither id is listed. Credits comes from the compute-crafter pack and the six Claude tabs from the Claudius pack, each pinned at a full commit SHA and named as [id, Name] pairs because actions/pages reads this list before it checks the packs out. Keys: Git Crafter quality/CONFIG.md.",
  "tabs": [
   "code",
   "documentation",
   "issues",
   "pull-requests",
+  "discussions",
   "actions",
-  "tests",
   "security",
+  "dependabot",
+  "scanning",
   "insights",
   "settings",
-  "credits",
-  "tools",
-  [
-   "claude",
-   "Claude"
-  ],
-  [
-   "claude-settings",
-   "Claude settings"
-  ],
-  [
-   "desktop-app",
-   "Claude desktop app"
-  ],
-  [
-   "blockers",
-   "Blockers"
-  ],
-  [
-   "tokens",
-   "Tokens"
-  ],
-  [
-   "instructions",
-   "Instructions"
-  ]
+  ["credits", "Credits"],
+  ["claude", "Claude"],
+  ["claude-settings", "Claude settings"],
+  ["desktop-app", "Claude desktop app"],
+  ["blockers", "Blockers"],
+  ["tokens", "Tokens"],
+  ["instructions", "Instructions"]
  ],
  "packs": [
-  "Colorado-Startups/claudius@25ff64c245bdeb543974acf1a19a76745758f5ed"
+  "Colorado-Startups/claudius@9d1fa89a9ee98d3e86048bcca3c5c1a51a54b086",
+  "SoulCraft-Org/compute-crafter@a1c6d5b6d5b05d4d4ffe650cd4374927d210bc9c"
  ]
 }
