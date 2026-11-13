@@ -2,8 +2,10 @@ name: pages
 
 # Git Crafter's pages for this repo (Git Crafter templates/ci/pages.yml): the Process page and the Quality, Speed and
 # Consumption page, built by Git Crafter's actions/pages from quality/process/config.json and quality/config.json and
-# published to GitHub Pages. The pin is a full commit SHA with its version comment; Dependabot's github-actions entry
-# bumps it with ci.yml's. A pull request builds the pages and runs the docs.unmapped gate, so its trigger lists the
+# published to GitHub Pages. Each step names its action by full version tag, locked to a commit in
+# .github/workflows/actions.lock (gh actions-lock; Git Crafter templates/ci/DECISIONS.md, 2026-11-10). actions/pages
+# is named by tag like the rest; .github/ci-standard.json excepts it from the pinned rule, which cannot read subpaths.
+# Dependabot's github-actions entry bumps every pin. A pull request builds the pages and runs the docs.unmapped gate, so its trigger lists the
 # doc globs (every Link doc is a .md file); only a push to main publishes.
 on:
   push:
@@ -13,6 +15,7 @@ on:
       - "**/*.md"
       - "quality/**"
       - ".github/workflows/pages.yml"
+      - ".github/workflows/actions.lock"
   workflow_dispatch:
 
 permissions:
@@ -38,22 +41,23 @@ jobs:
       vulnerability-alerts: read
     steps:
       # Full history: the docs collector dates each doc against its area's last commit.
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@v7.0.1
         with:
           persist-credentials: false
           fetch-depth: 0
 
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+      - uses: actions/setup-node@v7.1.0
         with:
           node-version: 26
+          cache: npm
 
-      - uses: SoulCraft-Org/git-crafter/actions/pages@8efee362526579f93e9537ef5944200908a68f67 # v5.0.1
+      - uses: SoulCraft-Org/git-crafter/actions/pages@v7.0.0
         with:
           pages: process quality
           config: quality/process/config.json
           quality-config: quality/config.json
 
-      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+      - uses: actions/upload-pages-artifact@v5.0.0
         if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
         with:
           path: quality/dist
@@ -71,4 +75,4 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - id: deployment
-        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
+        uses: actions/deploy-pages@v5.0.1

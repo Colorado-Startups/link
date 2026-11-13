@@ -1,11 +1,26 @@
-# Bumps the CI standard's pin (and every other action pin) once a week, in one pull request
-# (Git Crafter templates/ci/dependabot.yml).
+# Weekly version updates, one grouped pull request per ecosystem (Git Crafter templates/ci/dependabot.yml). The
+# github-actions entry bumps the CI standard's pin and every other action pin; the npm entry bumps package.json and
+# package-lock.json. A 14-day cooldown holds back a release until it has been public two weeks, so a hijacked
+# version is likely caught before it lands here (docs.github.com, "Dependabot options reference", cooldown).
+# Security updates ignore the cooldown.
 version: 2
 updates:
   - package-ecosystem: github-actions
     directory: /
     schedule:
       interval: weekly
+    cooldown:
+      default-days: 14
     groups:
       actions:
+        patterns: ["*"]
+
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 14
+    groups:
+      npm:
         patterns: ["*"]

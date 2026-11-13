@@ -1,0 +1,6 @@
+[
+  {
+    "id": "code.check_seconds",
+    "params": { "check": { "workflow": "ci.yml", "job": "short" } }
+  }
+]

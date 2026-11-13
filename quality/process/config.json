@@ -1,5 +1,5 @@
 {
- "comment": "Link's Process page config and its maps file, from Git Crafter v5.0.1 templates/process/config.json. No deploy map: Link ships no deployment. Triage drops its card step: Link has no project board, so projects.latest_cycle_hours is not on its Quality page. Guard and Decide come from the Claudius pack that quality/config.json names. Keys: Git Crafter actions/pages/action.yml; maps: pages/maps/README.md.",
+ "comment": "Link's Process page config and its maps file, from Git Crafter v7.0.0 templates/process/config.json. No deploy map, and Contribute drops its deploy step: Link ships no deployment. Triage drops its card step: Link has no project board, so projects.latest_cycle_hours is not on its Quality page. Guard and Decide come from the Claudius pack that quality/config.json names. Keys: Git Crafter actions/pages/action.yml; maps: pages/maps/README.md.",
  "repos": [
   "link"
  ],
@@ -30,6 +30,17 @@
   },
   {
    "use": "secure"
+  },
+  {
+   "use": "document"
+  },
+  {
+   "use": "contribute",
+   "steps": {
+    "deploy": {
+     "drop": true
+    }
+   }
   },
   {
    "use": "guard"

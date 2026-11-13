@@ -1,0 +1,21 @@
+[
+  {
+    "id": "tests.e2e_routes",
+    "drop": true,
+    "goal_source": "Link, 2026-11-13: dropped, as Link has no website and so no page routes; its params still name the suites and the test workflow for the rest of the tests collector",
+    "params": {
+      "suites": [{ "label": "Unit", "dir": "tests/", "file": "\\.test\\.ts$" }],
+      "workflows": [{ "file": "ci.yml", "job": "ci / short", "role": "suite" }]
+    }
+  },
+  {
+    "id": "tests.axe_routes",
+    "drop": true,
+    "goal_source": "Link, 2026-11-13: dropped, as Link has no website and so no page to check with axe"
+  },
+  {
+    "id": "tests.e2e_shard_p50",
+    "drop": true,
+    "goal_source": "Link, 2026-11-13: dropped, as Link has no browser specs and so no e2e shards; tests/e2e.test.ts runs the server over stdio inside the one unit suite"
+  }
+]
