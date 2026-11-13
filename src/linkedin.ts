@@ -8,10 +8,12 @@
 // little-text-format and sign-in-with-linkedin-v2; view li-lms-2026-10, read 2026-11-12).
 import { spawn } from 'node:child_process';
 import { createHash } from 'node:crypto';
+import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { stat } from 'node:fs/promises';
 import { homedir } from 'node:os';
 import { basename, extname, isAbsolute, join } from 'node:path';
 import apiVersion from '../quality/api-version.json' with { type: 'json' };
+import type { Desk } from './desk.ts';
 import { appendLedger, lastLedgerLines } from './ledger.ts';
 
 /** The pinned `Linkedin-Version`, from quality/api-version.json (tests/version.test.ts watches its sunset). */
@@ -400,6 +402,77 @@ export async function publishPost(
     ledger = `not written: could not append to ${join(config.home, 'ledger.jsonl')}`;
   }
   return { urn: post.id, url, kind, chars: input.text.length, ledger };
+}
+
+const POST = /urn:li:(?:share|ugcPost|activity):\d+/;
+const COMMENT = /^urn:li:comment:\((?:urn:li:)?(activity|ugcPost|share):(\d+),(\d+)\)$/;
+
+/** What `comment_create` takes: the post (URN or URL), the text, and the comment it answers, if any. */
+export interface CommentInput {
+  post: string;
+  text: string;
+  parent?: string;
+}
+
+/**
+ * Comments on a post, or replies under one comment, as the signed-in member, through the older
+ * /v2/socialActions/{urn}/comments endpoint (comments-api, li-lms-2026-10, read 2026-11-13). This app's products list
+ * no comments endpoint, so on a 403 it writes LINK_HOME/comments-api-refused and from then on, like that call, puts
+ * the text on the clipboard and opens the post for the member to paste. The text is plain: comments take no little
+ * format. Live, a sent comment appends a ledger line; a dry run returns the requests and touches nothing.
+ */
+export async function commentCreate(input: CommentInput, config: Config, transport: Transport, desk: Desk, now: Date = new Date()) {
+  let decoded = input.post;
+  try {
+    decoded = decodeURIComponent(input.post);
+  } catch {
+    // Not encoded: used as it is.
+  }
+  const post = POST.exec(decoded)?.[0];
+  if (!post) throw new LinkError('post must be a post URN (urn:li:activity:, urn:li:share: or urn:li:ugcPost: and digits) or a post URL that holds one.');
+  let parent: string | undefined;
+  if (input.parent !== undefined) {
+    const m = COMMENT.exec(input.parent.trim());
+    if (!m) throw new LinkError('parent must be a comment URN, for example urn:li:comment:(urn:li:activity:123,456).');
+    parent = `urn:li:comment:(urn:li:${m[1]}:${m[2]},${m[3]})`;
+  }
+  const url = `https://www.linkedin.com/feed/update/${post}/`;
+  const refused = join(config.home, 'comments-api-refused');
+  const byHand = async (reason: string) => {
+    if (!config.dryRun) {
+      await desk.copy(input.text);
+      await desk.open(url);
+    }
+    return { sent: false, reason, opened: url, next: 'Press Cmd+V in the comment box, read it, press Enter.' };
+  };
+  if (existsSync(refused)) return byHand(`LinkedIn refused the comments endpoint before. Delete ${refused} to try it again.`);
+  const session = open(config, transport);
+  const { author } = await whoAmI(session);
+  let sent: Reply;
+  try {
+    sent = await session.send({
+      method: 'POST',
+      url: `${API}/v2/socialActions/${encodeURIComponent(parent ?? post)}/comments`,
+      headers: apiHeaders(true),
+      json: { actor: author, object: post, message: { text: input.text }, ...(parent ? { parentComment: parent } : {}) },
+    });
+  } catch (error) {
+    if (!(error instanceof LinkError) || error.status !== 403) throw error;
+    mkdirSync(config.home, { recursive: true, mode: 0o700 });
+    writeFileSync(refused, `${now.toISOString()}\n`, { mode: 0o600 });
+    return byHand('LinkedIn refused the comments endpoint for this app (403).');
+  }
+  if (session.planned) return { dry_run: true, requests: session.planned };
+  let ledger = 'written';
+  try {
+    appendLedger(config.home, {
+      time: now.toISOString(), kind: 'comment', urn: sent.id ?? '', url, chars: input.text.length,
+      sha256: createHash('sha256').update(input.text).digest('hex'), media: null,
+    });
+  } catch {
+    ledger = `not written: could not append to ${join(config.home, 'ledger.jsonl')}`;
+  }
+  return { sent: true, comment: sent.id, url, ledger };
 }
 
 /**

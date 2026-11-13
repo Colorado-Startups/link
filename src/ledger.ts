@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// The ledger: one JSON line per published post, appended to LINK_HOME/ledger.jsonl and never rewritten. It holds what
+// The ledger: one JSON line per published post or comment, appended to LINK_HOME/ledger.jsonl and never rewritten. It holds what
 // was posted and where, never the token.
 import { appendFileSync, mkdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -8,7 +8,7 @@ import { join } from 'node:path';
 export interface LedgerEntry {
   /** When LinkedIn accepted the post, ISO 8601 in UTC. */
   time: string;
-  kind: 'text' | 'image' | 'document';
+  kind: 'text' | 'image' | 'document' | 'comment';
   /** The post URN from LinkedIn's `x-restli-id` header. */
   urn: string;
   url: string;

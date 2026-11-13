@@ -50,7 +50,9 @@ export const writeInbox = (config: Config, threads: Thread[]) => writeJson(inbox
 function readJson<T>(path: string, missing: () => T): T {
   try {
     return JSON.parse(readFileSync(path, 'utf8')) as T;
-  } catch {
+  } catch (error) {
+    // Only a missing file is empty: a corrupt one would let the next write drop every earlier mark.
+    if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw new LinkError(`${path} is not readable JSON. Fix or delete it.`);
     return missing();
   }
 }
