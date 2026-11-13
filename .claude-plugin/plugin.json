@@ -1,0 +1,19 @@
+{
+  "name": "link",
+  "version": "0.2.0",
+  "description": "Post, comment and reply on LinkedIn from Claude, behind a macOS approval dialog; triage your inbox and clean up connections from your own data export.",
+  "author": { "name": "Colorado Startups" },
+  "homepage": "https://github.com/Colorado-Startups/link",
+  "repository": "https://github.com/Colorado-Startups/link",
+  "license": "Apache-2.0",
+  "keywords": ["linkedin", "mcp"],
+  "mcpServers": {
+    "link": {
+      "command": "node",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/src/server.ts"],
+      "env": {
+        "LINK_HELPER_CMD": "[\"/bin/sh\",\"-c\",\"LINKEDIN_ACCESS_TOKEN=\\\"$(/usr/bin/security find-generic-password -s link-linkedin -w)\\\" exec /usr/local/bin/link-linkedin\"]"
+      }
+    }
+  }
+}

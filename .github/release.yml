@@ -1,0 +1,12 @@
+# Groups for GitHub's generated release notes (gh release create <tag> --generate-notes), from Git Crafter
+# templates/open/.github/release.yml. "*" catches every pull request no group matched, so it stays last.
+changelog:
+  categories:
+    - title: Fixes
+      labels: [bug]
+    - title: Features
+      labels: ["idea: accepted"]
+    - title: Dependencies
+      labels: [dependencies]
+    - title: Other changes
+      labels: ["*"]
