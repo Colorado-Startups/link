@@ -1,11 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 // post_publish: one post as the signed-in member, text alone or with one image or one PDF, and the little text format
 // its commentary needs. Live, a post appends a ledger line; a dry run returns the requests and writes nothing.
-import { createHash } from 'node:crypto';
 import { stat } from 'node:fs/promises';
-import { basename, extname, isAbsolute, join } from 'node:path';
+import { basename, extname, isAbsolute } from 'node:path';
 import { LinkError, type Config, type Transport } from './core.ts';
-import { appendLedger } from './ledger.ts';
+import { recordLedger } from './ledger.ts';
 import { API, apiHeaders, field, openSession, whoAmI, type Session } from './session.ts';
 
 // A hashtag's #, left as it is, or any reserved character, captured to be escaped.
@@ -76,6 +75,26 @@ export interface PostInput {
   visibility?: 'PUBLIC' | 'CONNECTIONS';
 }
 
+/** The `content` of a post with media: the upload's URN, and for a document the title LinkedIn shows on it. */
+async function attach(session: Session, author: string, media: Media, title: string | undefined) {
+  const id = await upload(session, author, media);
+  // An image is attached by its URN alone; a document also carries its title.
+  return { media: media.kind === 'document' ? { id, title } : { id } };
+}
+
+/** The body of the POST /rest/posts request. */
+function postBody(author: string, input: PostInput, content: Awaited<ReturnType<typeof attach>> | undefined) {
+  return {
+    author,
+    commentary: escapeLittle(input.text),
+    visibility: input.visibility ?? 'PUBLIC',
+    distribution: { feedDistribution: 'MAIN_FEED', targetEntities: [], thirdPartyDistributionChannels: [] },
+    ...(content ? { content } : {}),
+    lifecycleState: 'PUBLISHED',
+    isReshareDisabledByAuthor: false,
+  };
+}
+
 /**
  * Publishes one post as the signed-in member: text alone, or text with one image or one PDF. Live, it returns the post
  * URN and URL and appends a ledger line. In a dry run it returns the requests it would hand to the helper, in order,
@@ -90,25 +109,12 @@ export async function publishPost(
   const media = input.media === undefined ? null : await checkMedia(input.media, input.title);
   const session = openSession(config, transport);
   const { author } = await whoAmI(session);
-  // An image is attached by its URN alone; a document also carries the title LinkedIn shows on it.
-  let content: { media: { id: string; title?: string } } | undefined;
-  if (media) {
-    const id = await upload(session, author, media);
-    content = { media: media.kind === 'document' ? { id, title: input.title } : { id } };
-  }
+  const content = media ? await attach(session, author, media, input.title) : undefined;
   const post = await session.send({
     method: 'POST',
     url: `${API}/rest/posts`,
     headers: apiHeaders(true),
-    json: {
-      author,
-      commentary: escapeLittle(input.text),
-      visibility: input.visibility ?? 'PUBLIC',
-      distribution: { feedDistribution: 'MAIN_FEED', targetEntities: [], thirdPartyDistributionChannels: [] },
-      ...(content ? { content } : {}),
-      lifecycleState: 'PUBLISHED',
-      isReshareDisabledByAuthor: false,
-    },
+    json: postBody(author, input, content),
   });
   if (session.planned) return { dry_run: true, requests: session.planned };
   if (!post.id) {
@@ -118,22 +124,7 @@ export async function publishPost(
   }
   const kind = media?.kind ?? 'text';
   const url = `https://www.linkedin.com/feed/update/${post.id}/`;
-  // The post is live by now, so a ledger that cannot be written is reported, never thrown: an error here would invite
-  // a second post.
-  let ledger = 'written';
-  try {
-    appendLedger(config.home, {
-      time: now.toISOString(),
-      kind,
-      urn: post.id,
-      url,
-      chars: input.text.length,
-      sha256: createHash('sha256').update(input.text).digest('hex'),
-      media: media?.name ?? null,
-    });
-  } catch {
-    ledger = `not written: could not append to ${join(config.home, 'ledger.jsonl')}`;
-  }
+  const entry = { time: now.toISOString(), kind, urn: post.id, url, media: media?.name ?? null };
+  const ledger = recordLedger(config.home, entry, input.text);
   return { urn: post.id, url, kind, chars: input.text.length, ledger };
 }
-
