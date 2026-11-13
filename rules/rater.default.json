@@ -1,0 +1,20 @@
+{
+  "new_days": 90,
+  "low_days": 365,
+  "pitch": [
+    "book a call", "book a demo", "schedule a call", "schedule a demo", "quick call", "15 minutes", "15 min",
+    "free consultation", "free audit", "i help companies", "i help businesses", "our services", "our solution",
+    "our platform", "lead generation", "boost your", "grow your business", "increase your revenue", "case study",
+    "partnership opportunity", "pick your brain", "hop on a call", "let me know if you are interested",
+    "would love to connect and share", "limited time", "special offer"
+  ],
+  "sales": [
+    "sales", "business development", "bdr", "sdr", "account executive", "account manager", "lead generation",
+    "lead gen", "appointment setting", "recruiter", "recruiting", "talent acquisition", "headhunter", "staffing",
+    "mlm", "network marketing", "independent distributor", "independent consultant", "direct sales", "affiliate",
+    "insurance agent", "financial advisor", "real estate agent", "growth hacker", "outreach"
+  ],
+  "mission": [],
+  "places": [],
+  "keep_files": []
+}

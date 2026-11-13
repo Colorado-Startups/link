@@ -1,0 +1,11 @@
+# Bumps the CI standard's pin (and every other action pin) once a week, in one pull request
+# (Git Crafter templates/ci/dependabot.yml).
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns: ["*"]

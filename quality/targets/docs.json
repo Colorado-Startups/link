@@ -1,0 +1,13 @@
+[
+  {
+    "id": "docs.dead_paths",
+    "params": {
+      "areas": [
+        {"doc": "skills/link-post/SKILL.md", "area": ["src/server.ts", "templates/carousel.html"]},
+        {"doc": "docs/connections.md", "area": ["src/archive.ts", "src/connections.ts", "src/rater.ts", "rules/rater.default.json"]},
+        {"doc": "docs/setup.md", "area": ["install.sh", "trusted/link-linkedin"]},
+        {"doc": "**", "area": ["{dir}/"]}
+      ]
+    }
+  }
+]

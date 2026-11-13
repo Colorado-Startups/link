@@ -1,0 +1,4 @@
+# Requests a review from the owner on every PR; the ruleset decides what blocks a merge.
+# The last matching line wins.
+*            @paul-co-startups
+/.github/    @paul-co-startups

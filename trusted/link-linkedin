@@ -1,0 +1,5 @@
+#!/bin/dash
+case "$LINKEDIN_ACCESS_TOKEN" in ''|*[!A-Za-z0-9._:+/=-]*) exit 4 ;; esac
+exec /usr/bin/env -i HOME="$HOME" /opt/homebrew/bin/node --env-file=/dev/fd/3 /usr/local/lib/link/link-linkedin.mjs 3<<EOF
+LINKEDIN_ACCESS_TOKEN=$LINKEDIN_ACCESS_TOKEN
+EOF

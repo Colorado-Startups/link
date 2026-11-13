@@ -1,0 +1,9 @@
+node_modules/
+# Rendered carousels and local data never belong in the repo.
+*.pdf
+.link/
+.env*
+# What a Quality collect writes. A --local run reads this machine's Claude sessions; it never belongs in the repo.
+quality/data/
+quality/history/
+quality/dist/
