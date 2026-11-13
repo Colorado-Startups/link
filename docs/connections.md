@@ -24,7 +24,7 @@ Default word lists: `rules/rater.default.json`. `LINK_RATER` names a JSON overla
 | 4 to 7 | 50 | 25 |
 | 8 on | 80 | 40 |
 
-A sitting ends after 30 minutes idle. `connections_next` waits 15 to 45 seconds after the last removal. A `warning` mark writes `LINK_HALT_FILE`; while it exists, `connections_next` and `post_publish` refuse until you delete it.
+A sitting ends after 30 minutes idle. `connections_next` waits 15 to 45 seconds after the last removal. A `warning` mark writes `LINK_HALT_FILE`; while it exists, `connections_next`, `post_publish`, `comment_create` and `reply_open` refuse until you delete it.
 
 | Variable | Use |
 |---|---|
