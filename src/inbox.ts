@@ -45,6 +45,7 @@ export function waitingThreads(threads: Map<string, Message[]>, mine: (m: Messag
   return out;
 }
 
+/** Saves the waiting threads as LINK_HOME/inbox.json, for the owner only. */
 export const writeInbox = (config: Config, threads: Thread[]) => writeJson(inboxFile(config), threads);
 
 function readJson<T>(path: string, missing: () => T): T {
@@ -81,11 +82,13 @@ function waiting(config: Config): Thread[] {
 export const threadLink = (id: string) =>
   /^2-[\w+/=-]+$/.test(id) ? `https://www.linkedin.com/messaging/thread/${encodeURIComponent(id)}/` : 'https://www.linkedin.com/messaging/';
 
+/** The waiting threads, newest first, up to `limit`, each with its link and a warning that its text is untrusted. */
 export function inboxNext(input: { limit: number }, config: Config) {
   const all = waiting(config);
   return { waiting: all.length, untrusted: UNTRUSTED, threads: all.slice(0, input.limit).map((t) => ({ ...t, link: threadLink(t.id) })) };
 }
 
+/** Marks one thread done, skip or spam, so inboxNext leaves it out. */
 export function inboxMark(input: { thread: string; action: string }, config: Config) {
   const thread = find(config, input.thread);
   const all = marks(config);
@@ -94,6 +97,7 @@ export function inboxMark(input: { thread: string; action: string }, config: Con
   return { marked: input.action, thread: thread.id, waiting: waiting(config).length };
 }
 
+/** Puts an approved reply on the clipboard and opens its thread, for the member to paste and send. Sends nothing. */
 export async function replyOpen(input: { thread: string; text: string }, config: Config, env: Env, desk: Desk) {
   refuseWhileHalted(env, config);
   const thread = find(config, input.thread);
