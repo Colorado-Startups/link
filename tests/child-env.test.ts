@@ -7,7 +7,8 @@ import assert from 'node:assert/strict';
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { helperTransport, type Spec } from '../src/linkedin.ts';
+import type { Spec } from '../src/core.ts';
+import { helperTransport } from '../src/linkedin.ts';
 import { liveConfig, tempDir } from './fake-linkedin.ts';
 import { call } from './rpc.ts';
 

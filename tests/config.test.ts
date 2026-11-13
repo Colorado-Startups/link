@@ -4,7 +4,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
-import { configFrom } from '../src/linkedin.ts';
+import { configFrom } from '../src/core.ts';
 
 test('an empty environment: no helper, dry-run off, ~/.link, no gates and the default gate prefix', () => {
   assert.deepEqual(configFrom({}), {

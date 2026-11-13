@@ -7,7 +7,7 @@
 // server's environment holds the LinkedIn token (refuseToken).
 import { spawn } from 'node:child_process';
 import { basename } from 'node:path';
-import { childEnv, LinkError } from './linkedin.ts';
+import { childEnv, LinkError } from './core.ts';
 
 const LIMIT_MS = 60_000;
 const EXAMPLE = '[["python3","/abs/check.py","--hook"]]';

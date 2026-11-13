@@ -5,8 +5,8 @@
 // cap, a random gap since the last removal, and a stop while the halt file exists.
 import { chmodSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
-import { connectionsFile, readConnections, writeJson, type Connection } from './archive.ts';
-import { LinkError, type Config } from './linkedin.ts';
+import { LinkError, type Config } from './core.ts';
+import { connectionsFile, readConnections, writeJson, type Connection } from './store.ts';
 import { hasWord, loadRules, normUrl, REASON_ORDER } from './rater.ts';
 
 type Env = Record<string, string | undefined>;
@@ -29,7 +29,7 @@ function events(config: Config): Event[] {
 }
 
 /** The halt file: LINK_HALT_FILE, or `halt` in LINK_HOME when it is unset. */
-export const haltPath = (env: Env, config: Config): string => env.LINK_HALT_FILE || join(config.home, 'halt');
+const haltPath = (env: Env, config: Config): string => env.LINK_HALT_FILE || join(config.home, 'halt');
 
 /** Throws while the halt file exists: every LinkedIn action stops until a person deletes it. */
 export function refuseWhileHalted(env: Env, config: Config): void {

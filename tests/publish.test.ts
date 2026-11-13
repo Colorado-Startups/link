@@ -6,7 +6,8 @@ import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { API_VERSION, LinkError, publishPost } from '../src/linkedin.ts';
+import { LinkError } from '../src/core.ts';
+import { API_VERSION, publishPost } from '../src/linkedin.ts';
 import {
   AUTHOR, DOCUMENT_UPLOAD_URL, IMAGE_UPLOAD_URL, POST_URN,
   fakeLinkedIn, liveConfig, mediaFile, reply, tempDir,

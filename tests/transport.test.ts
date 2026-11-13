@@ -7,7 +7,8 @@ import assert from 'node:assert/strict';
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { LinkError, childEnv, helperTransport, type Spec } from '../src/linkedin.ts';
+import { LinkError, childEnv, type Spec } from '../src/core.ts';
+import { helperTransport } from '../src/linkedin.ts';
 import { tempDir } from './fake-linkedin.ts';
 
 const SPEC: Spec = {

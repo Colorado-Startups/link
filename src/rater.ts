@@ -6,7 +6,7 @@
 import { readFileSync } from 'node:fs';
 import { parseCsv } from './csv.ts';
 
-export type Tier = 'PROTECTED' | 'KEEP' | 'REVIEW' | 'REMOVE';
+type Tier = 'PROTECTED' | 'KEEP' | 'REVIEW' | 'REMOVE';
 /** The order connections_next removes in: the owner's own marks first, then the likeliest pitches. */
 export const REASON_ORDER = ['override', 'pitch', 'sales', 'empty', 'low'];
 

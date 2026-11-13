@@ -17,7 +17,8 @@ import { macDesk, type Desk } from './desk.ts';
 import { inboxMark, inboxNext, replyOpen } from './inbox.ts';
 import { connectionsCheck, connectionsList, connectionsMark, connectionsNext, refuseWhileHalted } from './connections.ts';
 import { runGates } from './gates.ts';
-import { commentCreate, configFrom, helperTransport, LinkError, linkStatus, publishPost, refuseToken, type Config, type Transport } from './linkedin.ts';
+import { configFrom, LinkError, type Config, type Transport } from './core.ts';
+import { commentCreate, helperTransport, linkStatus, publishPost, refuseToken } from './linkedin.ts';
 
 const Tier = z.enum(['PROTECTED', 'KEEP', 'REVIEW', 'REMOVE']);
 

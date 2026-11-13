@@ -2,39 +2,15 @@
 // archive_load: reads a LinkedIn data export (the .zip or the unpacked folder) once, rates every connection and writes
 // LINK_HOME/connections.json and inbox.json (600). It reads local files only. A re-load keeps the owner's marks and states by URL.
 import { execFile } from 'node:child_process';
-import { chmodSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync } from 'node:fs';
+import { join } from 'node:path';
 import { parseCsv, records } from './csv.ts';
 import { waitingThreads, writeInbox } from './inbox.ts';
-import { childEnv, LinkError, type Config } from './linkedin.ts';
+import { childEnv, LinkError, type Config } from './core.ts';
 import { hasWord, loadKeep, loadRules, normUrl, rate, type Row } from './rater.ts';
+import { connectionsFile, readConnections, writeJson, type Connection } from './store.ts';
 
 type Env = Record<string, string | undefined>;
-
-/** One stored connection: the export's fields, its signals, the owner's mark and state, and its tier and reason. */
-export interface Connection extends Row {
-  state?: 'removed' | 'skipped';
-  note?: string;
-  tier: string;
-  reason: string;
-}
-
-export const connectionsFile = (config: Config) => join(config.home, 'connections.json');
-
-export function readConnections(config: Config): Connection[] {
-  try {
-    return JSON.parse(readFileSync(connectionsFile(config), 'utf8')) as Connection[];
-  } catch {
-    throw new LinkError('No connections loaded yet. Run archive_load with the path to your LinkedIn data export first.');
-  }
-}
-
-/** Writes JSON for the owner only (600). */
-export function writeJson(path: string, value: unknown): void {
-  mkdirSync(dirname(path), { recursive: true, mode: 0o700 });
-  writeFileSync(path, JSON.stringify(value), { mode: 0o600 });
-  chmodSync(path, 0o600);
-}
 
 /** YYYY-MM-DD of a date as the export writes it ("13 Nov 2026" or "2026-11-13 10:00:00 UTC"), or ''. */
 function isoDate(text: string): string {

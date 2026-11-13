@@ -10,9 +10,9 @@ import { spawn } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { stat } from 'node:fs/promises';
-import { homedir } from 'node:os';
 import { basename, extname, isAbsolute, join } from 'node:path';
 import apiVersion from '../quality/api-version.json' with { type: 'json' };
+import { childEnv, LinkError, type Config, type HelperResult, type Spec, type Transport } from './core.ts';
 import type { Desk } from './desk.ts';
 import { appendLedger, lastLedgerLines } from './ledger.ts';
 
@@ -29,43 +29,6 @@ const HELPER_EXAMPLE =
   'Set it to the command that starts the helper with the token, as a JSON array of strings, for example ["/bin/sh","-c","LINKEDIN_ACCESS_TOKEN=\\"$(/usr/bin/security find-generic-password -s link-linkedin -w)\\" exec /usr/local/bin/link-linkedin"].';
 const TOKEN_IN_SERVER_ENV =
   "LINKEDIN_ACCESS_TOKEN is set in the Link server's environment. The server must not hold the token. Remove it and let the helper command supply the token (for example a key tool that starts link-linkedin).";
-/** The only variables a process the server starts gets from it. Never the token, NODE_OPTIONS, BASH_ENV or ENV. */
-const CHILD_ENV = ['HOME', 'USER', 'LOGNAME', 'PATH', 'TMPDIR'];
-
-/** A failure whose message is safe to show and names the fix. `status` is LinkedIn's HTTP status, when there was one. */
-export class LinkError extends Error {
-  status: number | undefined;
-
-  constructor(message: string, status?: number) {
-    super(message);
-    this.status = status;
-  }
-}
-
-/** What the server reads from its environment. None of it is a secret. */
-export interface Config {
-  /** LINK_HELPER_CMD: the command that runs the trusted helper, as a JSON array of strings. */
-  helper: string | undefined;
-  /** LINK_DRY_RUN=1: no helper call and no ledger line. */
-  dryRun: boolean;
-  /** LINK_HOME, default ~/.link: the folder that holds the ledger. */
-  home: string;
-  /** LINK_GATES: the pre-publish gate commands, as a JSON array of argument arrays (src/gates.ts). */
-  gates: string | undefined;
-  /** LINK_GATE_TOOL_PREFIX, default mcp__link__: what a gate sees before the tool's name. */
-  gatePrefix: string;
-}
-
-export function configFrom(env: Record<string, string | undefined>): Config {
-  return {
-    helper: env.LINK_HELPER_CMD || undefined,
-    dryRun: env.LINK_DRY_RUN === '1',
-    home: env.LINK_HOME || join(homedir(), '.link'),
-    gates: env.LINK_GATES || undefined,
-    gatePrefix: env.LINK_GATE_TOOL_PREFIX ?? 'mcp__link__',
-  };
-}
-
 // A hashtag's #, left as it is, or any reserved character, captured to be escaped.
 const LITTLE = /(?<!\S)#(?=[\p{L}\p{M}\p{N}]*\p{L})|([|{}@\[\]()<>#\\*_~])/gu;
 
@@ -78,26 +41,6 @@ const LITTLE = /(?<!\S)#(?=[\p{L}\p{M}\p{N}]*\p{L})|([|{}@\[\]()<>#\\*_~])/gu;
 export function escapeLittle(text: string): string {
   return text.replace(LITTLE, (match: string, reserved?: string) => (reserved ? `\\${reserved}` : match));
 }
-
-/** One request for the helper: where it goes, the headers a caller may set, and a JSON body or a file to upload. */
-export interface Spec {
-  method: 'GET' | 'POST' | 'PUT';
-  url: string;
-  headers: Record<string, string>;
-  json?: unknown;
-  /** Absolute path of the file a PUT uploads. The helper reads it. */
-  file?: string;
-}
-
-/** What the helper returns for a request it sent, whatever the HTTP status. */
-export interface HelperResult {
-  status: number;
-  headers: Record<string, string>;
-  body: unknown;
-}
-
-/** Sends one spec and returns LinkedIn's answer, or throws a LinkError when nothing came back. */
-export type Transport = (spec: Spec) => Promise<HelperResult>;
 
 /** `METHOD host/path` of a spec, for messages. No query string: an upload URL's query is a credential. */
 function where(spec: Spec): string {
@@ -118,19 +61,6 @@ function helperCommand(raw: string | undefined): string[] {
   const valid = Array.isArray(command) && command.every((part) => typeof part === 'string') && !!command[0];
   if (!valid) throw new LinkError(`LINK_HELPER_CMD is not valid. ${HELPER_EXAMPLE}`);
   return command as string[];
-}
-
-/**
- * The environment of every process the server starts, the helper command and each gate: the CHILD_ENV variables that
- * `env` (the server's own environment) has, and nothing else. tests/child-env.test.ts checks every call site in src/.
- */
-export function childEnv(env: Record<string, string | undefined>): Record<string, string> {
-  const kept: Record<string, string> = {};
-  for (const name of CHILD_ENV) {
-    const value = env[name];
-    if (value !== undefined) kept[name] = value;
-  }
-  return kept;
 }
 
 /**
@@ -413,7 +343,7 @@ const COMMENT = /^urn:li:comment:\((?:urn:li:)?(activity|ugcPost|share):(\d+),(\
  * link adds `&replyUrn=urn:li:comment:(activity:P,R)`. `link` arrives URL-decoded. Returns the URN in the short form
  * COMMENT accepts; commentCreate expands it. Throws a LinkError when the link names a comment it cannot use.
  */
-export function commentFromLink(link: string): string | undefined {
+function commentFromLink(link: string): string | undefined {
   const query = link.includes('?') ? new URLSearchParams(link.slice(link.indexOf('?') + 1)) : undefined;
   const comment = query?.get('commentUrn') ?? undefined;
   const reply = query?.get('replyUrn') ?? undefined;

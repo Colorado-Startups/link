@@ -5,10 +5,10 @@
 // messaging API for this app and its User Agreement 8.2 bars bots that send messages, so the member presses Enter.
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { writeJson } from './archive.ts';
 import { refuseWhileHalted } from './connections.ts';
 import type { Desk } from './desk.ts';
-import { LinkError, type Config } from './linkedin.ts';
+import { LinkError, type Config } from './core.ts';
+import { writeJson } from './store.ts';
 
 type Env = Record<string, string | undefined>;
 type Message = Record<string, string>;
