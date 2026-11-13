@@ -1,0 +1,10 @@
+[
+  {
+    "id": "security.threat_model_current",
+    "params": {
+      "threat_model": "THREAT-MODEL.md",
+      "threat_model_covers": ["src/linkedin.ts", "src/gates.ts", "src/server.ts", "trusted/", "install.sh", ".github/workflows/"],
+      "threat_model_grace_days": 7
+    }
+  }
+]

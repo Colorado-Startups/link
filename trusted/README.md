@@ -1,71 +1,64 @@
 # The trusted helper
 
-`link-linkedin` is the one program that uses the LinkedIn token and shows the approval dialog. It receives the token from the process that starts it.
+`link-linkedin` is the one program that uses the LinkedIn token and shows the approval dialog. Threats and controls: [THREAT-MODEL.md](../THREAT-MODEL.md).
+
+```mermaid
+flowchart LR
+  K[(Keychain)] -->|token| L[launcher<br/>shape check, env -i] -->|fd 3| H[link-linkedin.mjs]
+  S[Link server] -->|spec on stdin| H
+  H -->|dialog: Publish?| A[api.linkedin.com]
+  H -->|result on stdout, no token| S
+```
 
 | Question | Answer |
 | --- | --- |
-| What it does | Reads one request spec as JSON on stdin. Adds the token. Asks the member before any write. Sends the request. Writes one JSON result on stdout |
-| Why it is separate | A session can edit any file in a repo checkout. So code there that receives a token can be changed to leak it, or to skip the approval |
-| What makes it trusted | It is installed as root-owned files, outside any checkout. Node built-ins only, and no import from `src/` |
-| Where the token comes from | The environment of the process that starts it: `LINKEDIN_ACCESS_TOKEN`. The helper cannot tell who that process is |
-| The supported setup | A key tool starts it. The token goes from the Keychain to the key tool to the helper, and never enters the MCP server |
-| What the server enforces | While the token is in the server's own environment, every tool call returns an error and starts no process. Every process the server starts, the helper command and each gate, gets `HOME`, `USER`, `LOGNAME`, `PATH` and `TMPDIR` only ([tests/child-env.test.ts](../tests/child-env.test.ts)) |
+| Why separate | A session can edit a checkout, so code there could be changed to leak the token or skip the dialog |
+| Why trusted | Root-owned files outside any checkout. Node built-ins only, no import from `src/` |
+| Token source | `LINKEDIN_ACCESS_TOKEN` from the key tool that starts it; it never enters the MCP server |
+| Server side | While the token is in the server's environment, every tool errors. Children get `HOME`, `USER`, `LOGNAME`, `PATH`, `TMPDIR` only |
 
-## Install
+## Install (`sudo ./install.sh`)
 
-Installing needs an administrator: both targets are root-owned.
-
-| Source | Target | Owner | Mode |
-| --- | --- | --- | --- |
-| [link-linkedin](link-linkedin) | `/usr/local/bin/link-linkedin` | root | 755 |
-| [link-linkedin.mjs](link-linkedin.mjs) | `/usr/local/lib/link/link-linkedin.mjs` | root | 644 |
-
-| The launcher | Does | So |
+| Source | Target | Mode |
 | --- | --- | --- |
-| Checks the token's shape | Exits 4 when the token is empty or has a character outside `A-Za-z0-9._:+/=-` | The one-line env file it writes cannot be misread |
-| Starts Node with `env -i` and `HOME` only | `NODE_OPTIONS`, `PATH` and exported shell functions never reach Node | Nothing in the caller's environment can change what Node runs |
-| Hands Node the token through a pipe on fd 3 | A here-document holds one line: the variable's name, `=`, the token. Node reads it with `--env-file=/dev/fd/3` | The token is never on a command line. There, `ps` would show it to every local process |
+| [link-linkedin](link-linkedin) (the launcher) | `/usr/local/bin/link-linkedin` | root 755 |
+| [link-linkedin.mjs](link-linkedin.mjs) | `/usr/local/lib/link/link-linkedin.mjs` | root 644 |
+| [link-token](link-token) (hidden dialog → Keychain) | `/usr/local/bin/link-token` | root 755 |
+
+`install.sh` refuses a Node the member can write. The launcher exits 4 on an empty token or one outside `A-Za-z0-9._:+/=-`, starts Node with `env -i` and `HOME` only, and passes the token on fd 3, never on a command line.
 
 ## Contract
 
 | Part | Shape |
 | --- | --- |
-| Spec (stdin) | `{ "method": "GET\|POST\|PUT\|PATCH\|DELETE", "url": "https://...", "headers": {...}, "json": {...} }`, or `"file": "/absolute/path"` in place of `json` |
-| Result (stdout) | `{ "status": 201, "headers": {...}, "body": ... }`. Headers: `x-restli-id`, `location`, `content-type`, `x-li-uuid` only |
-| Failure (stdout) | `{ "error": "..." }` |
+| Spec (stdin) | `{ "method", "url", "headers", "json" }`, or `"file": "/absolute/path"` in place of `json` |
+| Result (stdout) | `{ "status", "headers", "body" }`; headers `x-restli-id`, `location`, `content-type`, `x-li-uuid` only |
+| Failure | `{ "error": "..." }` |
 
-| Exit code | Meaning |
-| --- | --- |
-| 0 | Sent. The HTTP status is in the result |
-| 2 | Bad spec, refused host or refused header |
-| 3 | Not approved. Nothing was sent |
-| 4 | No token in the environment, or a token the launcher refuses for its shape |
-| 5 | Network error |
+| Exit | 0 sent | 2 bad spec, host or header | 3 not approved | 4 no or misshapen token | 5 network |
+| --- | --- | --- | --- | --- | --- |
 
 ## Guarantees
 
-Each row names the test that proves it: in [tests/helper.test.ts](../tests/helper.test.ts) for the helper, and in [tests/launcher.test.ts](../tests/launcher.test.ts) for the launcher.
+Tests: [helper.test.ts](../tests/helper.test.ts) (H), [launcher.test.ts](../tests/launcher.test.ts) (L), [token.test.ts](../tests/token.test.ts) (T).
 
 | Guarantee | Test |
 | --- | --- |
-| The token goes only to `https://api.linkedin.com` and `https://www.linkedin.com` | "host pinning", "a refused host exits 2" |
-| A redirect is never followed | "a redirect is not followed" |
-| A caller sets 3 headers at most, and never `Authorization` | "header allowlist", "a caller-supplied Authorization is rejected" |
-| Every write needs a click on Publish. Cancel is the default, and 600 seconds without an answer is a no | "the gate", "not approved", "askHuman runs /usr/bin/osascript" |
-| Only reads, upload registrations and file uploads to an upload URL skip the dialog | "the gate", "a read, an upload registration and a file upload" |
-| The text of a post cannot change the dialog's script: it is an argument, never part of the script | "the dialog arguments" |
-| The token never appears on stdout or stderr | "the token never appears in the output", "run as a program" |
-| The token is never on a command line | Launcher: "the token variable is in no command's arguments", "the launcher hands Node the token through a pipe" |
-| Node starts with `HOME` and the token, and nothing else from the caller. macOS adds `__CF_USER_TEXT_ENCODING` to every process itself | Launcher: "the launcher hands Node the token through a pipe" |
-| The request spec on stdin reaches the helper unchanged | Launcher: "the launcher hands Node the token through a pipe" |
-| An empty or misshapen token starts nothing | Launcher: "an empty token, or one with a character outside the key shape" |
-| The launcher is the reviewed five lines, and executable | Launcher: "the launcher is the reviewed five lines" |
+| Token goes only to `api.linkedin.com` and `www.linkedin.com`; no redirects | H "host pinning", "a redirect is not followed" |
+| 3 caller headers at most, never `Authorization` | H "header allowlist" |
+| Every write needs Publish; Cancel is the default; 600 s silence is a no | H "the gate", "not approved" |
+| Only reads, upload registrations and uploads skip the dialog | H "the gate" |
+| Post text is a dialog argument, never script | H "the dialog arguments" |
+| Token never on stdout, stderr or a command line | H "the token never appears in the output"; L "the token variable is in no command's arguments"; T "a good token goes to security on stdin" |
+| Node gets `HOME` and the token only (macOS adds `__CF_USER_TEXT_ENCODING` itself); the spec arrives unchanged | L "the launcher hands Node the token through a pipe" |
+| The launcher is the reviewed five lines, and executable | L "the launcher is the reviewed five lines" |
+| A bad token starts nothing or stores nothing | L "an empty token…"; T "a cancel, an empty answer or a bad character" |
 
 ## Limits
 
 | Limit | Detail |
 | --- | --- |
-| The real dialog | No test shows it. Tests fake `osascript`. The first live post proves it |
-| What the dialog shows | The first 700 characters of the text, then the full length |
-| File uploads | An upload sends any file the account can read to LinkedIn without a dialog. A file becomes visible only through a post, and a post needs approval |
-| Platform | macOS. Where `/usr/bin/osascript` is missing, every write is refused |
+| Real dialog | Untested in CI (fake `osascript`); first live use proves it |
+| Dialog text | First 700 characters, then the length |
+| Uploads | Any readable file can upload without a dialog; it shows only through a post, which needs one |
+| Platform | macOS; without `/usr/bin/osascript` every write is refused |
