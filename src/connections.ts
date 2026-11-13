@@ -5,8 +5,8 @@
 // cap, a random gap since the last removal, and a stop while the halt file exists.
 import { chmodSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
-import { connectionsFile, readConnections, writeJson, type Connection } from './archive.ts';
-import { LinkError, type Config } from './linkedin.ts';
+import { LinkError, type Config } from './core.ts';
+import { connectionsFile, readConnections, writeJson, type Connection } from './store.ts';
 import { hasWord, loadRules, normUrl, REASON_ORDER } from './rater.ts';
 
 type Env = Record<string, string | undefined>;
@@ -29,7 +29,7 @@ function events(config: Config): Event[] {
 }
 
 /** The halt file: LINK_HALT_FILE, or `halt` in LINK_HOME when it is unset. */
-export const haltPath = (env: Env, config: Config): string => env.LINK_HALT_FILE || join(config.home, 'halt');
+const haltPath = (env: Env, config: Config): string => env.LINK_HALT_FILE || join(config.home, 'halt');
 
 /** Throws while the halt file exists: every LinkedIn action stops until a person deletes it. */
 export function refuseWhileHalted(env: Env, config: Config): void {
@@ -40,6 +40,7 @@ export function refuseWhileHalted(env: Env, config: Config): void {
 const name = (c: Connection) => `${c.first} ${c.last}`.trim();
 const day = (iso: string) => iso.slice(0, 10);
 
+/** One page of the loaded connections that have no state, optionally only one tier or one reason. */
 export function connectionsList(input: { tier?: string; reason?: string; limit: number; offset: number }, config: Config) {
   const rows = readConnections(config).filter((c) => (!input.tier || c.tier === input.tier) && (!input.reason || c.reason === input.reason) && !c.state);
   return {
@@ -50,6 +51,7 @@ export function connectionsList(input: { tier?: string; reason?: string; limit: 
   };
 }
 
+/** Records the owner's decision for one connection; a warning also writes the halt file. */
 export function connectionsMark(input: { url: string; action: string; note?: string }, config: Config, env: Env) {
   const time = new Date().toISOString();
   const url = normUrl(input.url);
@@ -99,6 +101,7 @@ export function pace(all: Event[], now: Date) {
 /** LINK_GAP as [min, max] seconds; anything that is not "min-max" gives the default 15-45. */
 export const gapRange = (raw: string | undefined): number[] => (/^\d+(\.\d+)?-\d+(\.\d+)?$/.test(raw ?? '') ? raw! : '15-45').split('-').map(Number);
 
+/** The next connection to remove, in REASON_ORDER, after the halt, daily, sitting and gap checks. */
 export async function connectionsNext(config: Config, env: Env) {
   refuseWhileHalted(env, config);
   const p = pace(events(config), new Date());
@@ -119,18 +122,34 @@ export async function connectionsNext(config: Config, env: Env) {
 
 const plain = (s: string) => s.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase().replace(/[^a-z0-9 ]+/g, ' ').trim();
 
+type Page = { url: string; name: string; degree: string; location: string; headline: string };
+
+/** Why the page is not this connection's profile (its name, or a degree other than 1st), or undefined when it is. */
+function notThisProfile(c: Connection, page: Page): string | undefined {
+  const shown = plain(page.name);
+  if (!shown.includes(plain(c.first)) || !shown.includes(plain(c.last))) return 'name on the page differs from the export';
+  if (!/^1(st)?\b/i.test(page.degree.trim())) return 'not a 1st-degree connection';
+  return undefined;
+}
+
+/** Why the page's location or headline rescues the connection from removal, or undefined when nothing does. */
+function rescuedBy(c: Connection, page: Page, env: Env): string | undefined {
+  const rules = loadRules(env);
+  if (hasWord(page.location, rules.places)) return 'rescue place in the location';
+  if (['sales', 'empty', 'low'].includes(c.reason) && hasWord(page.headline, rules.mission)) return 'mission words in the headline';
+  return undefined;
+}
+
 /** REMOVE or SKIP for one profile page, from what the page shows. The export has no location or headline. */
-export function connectionsCheck(input: { url: string; name: string; degree: string; location: string; headline: string }, config: Config, env: Env) {
+export function connectionsCheck(input: Page, config: Config, env: Env) {
   const skip = (reason: string) => ({ verdict: 'SKIP', reason });
   const c = readConnections(config).find((r) => r.url === normUrl(input.url));
   if (!c) return skip('not in the loaded connections');
   if (c.tier !== 'REMOVE' || c.state) return skip(`not in the REMOVE tier (${c.state ?? c.tier})`);
-  const page = plain(input.name);
-  if (!page.includes(plain(c.first)) || !page.includes(plain(c.last))) return skip('name on the page differs from the export');
-  if (!/^1(st)?\b/i.test(input.degree.trim())) return skip('not a 1st-degree connection');
+  const mismatch = notThisProfile(c, input);
+  if (mismatch) return skip(mismatch);
   if (c.reason === 'override') return { verdict: 'REMOVE', reason: c.reason };
-  const rules = loadRules(env);
-  if (hasWord(input.location, rules.places)) return skip('rescue place in the location');
-  if (['sales', 'empty', 'low'].includes(c.reason) && hasWord(input.headline, rules.mission)) return skip('mission words in the headline');
+  const rescue = rescuedBy(c, input, env);
+  if (rescue) return skip(rescue);
   return { verdict: 'REMOVE', reason: c.reason };
 }

@@ -2,11 +2,11 @@
 // Test helper: one JSON-RPC request to a fresh Link server, answered in process through the SDK's request handler.
 import assert from 'node:assert/strict';
 import { createMcpHandler } from '@modelcontextprotocol/server';
-import type { Config, Transport } from '../src/linkedin.ts';
+import type { Config, Transport } from '../src/core.ts';
 import type { Desk } from '../src/desk.ts';
 import { buildServer } from '../src/server.ts';
 
-export interface ToolResult {
+interface ToolResult {
   isError?: boolean;
   content: { type: string; text: string }[];
 }

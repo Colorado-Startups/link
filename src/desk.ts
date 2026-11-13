@@ -3,7 +3,7 @@
 // clipboard with /usr/bin/pbcopy and opens a www.linkedin.com page with /usr/bin/open. Nothing here sends anything:
 // the member reads the reply, presses Cmd+V and then Enter. Tests pass a fake desk.
 import { spawn } from 'node:child_process';
-import { childEnv, LinkError } from './linkedin.ts';
+import { childEnv, LinkError } from './core.ts';
 
 export interface Desk {
   copy: (text: string) => Promise<void>;

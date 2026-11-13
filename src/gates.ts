@@ -7,7 +7,7 @@
 // server's environment holds the LinkedIn token (refuseToken).
 import { spawn } from 'node:child_process';
 import { basename } from 'node:path';
-import { childEnv, LinkError } from './linkedin.ts';
+import { childEnv, LinkError } from './core.ts';
 
 const LIMIT_MS = 60_000;
 const EXAMPLE = '[["python3","/abs/check.py","--hook"]]';
@@ -25,6 +25,7 @@ interface GateRun {
   reason: string;
 }
 
+/** Starts one gate with the tool call on stdin, and returns how it ended and what it printed. */
 function runGate(argv: string[], input: string, env: Record<string, string | undefined>): Promise<GateRun> {
   return new Promise((resolve) => {
     const child = spawn(argv[0], argv.slice(1), { stdio: 'pipe', timeout: LIMIT_MS, env: childEnv(env) });
@@ -41,16 +42,8 @@ function runGate(argv: string[], input: string, env: Record<string, string | und
   });
 }
 
-/**
- * Runs every gate. Returns their warnings and could-not-verify notes, or throws a LinkError when one blocks. `env` is
- * the server's own environment, from which each gate gets childEnv(env) only.
- */
-export async function runGates(
-  raw: string | undefined,
-  toolName: string,
-  toolInput: unknown,
-  env: Record<string, string | undefined>,
-): Promise<GateNotes> {
+/** The gate commands in `raw` (LINK_GATES), or a LinkError that names the fix. */
+function parseGates(raw: string | undefined): string[][] {
   let gates: unknown = [];
   try {
     if (raw) gates = JSON.parse(raw);
@@ -62,9 +55,33 @@ export async function runGates(
   if (!Array.isArray(gates) || !gates.every(isArgv)) {
     throw new LinkError(`LINK_GATES is not valid. Set it to a JSON array of argument arrays, for example ${EXAMPLE}.`);
   }
+  return gates as string[][];
+}
+
+/** The warning a passing gate wrote on stdout (hookSpecificOutput.additionalContext), or undefined for a plain pass. */
+function warningOf(stdout: string): string | undefined {
+  try {
+    const warning: unknown = JSON.parse(stdout)?.hookSpecificOutput?.additionalContext;
+    return typeof warning === 'string' && warning !== '' ? warning : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+/**
+ * Runs every gate. Returns their warnings and could-not-verify notes, or throws a LinkError when one blocks. `env` is
+ * the server's own environment, from which each gate gets childEnv(env) only.
+ */
+export async function runGates(
+  raw: string | undefined,
+  toolName: string,
+  toolInput: unknown,
+  env: Record<string, string | undefined>,
+): Promise<GateNotes> {
+  const gates = parseGates(raw);
   const input = JSON.stringify({ hook_event_name: 'PreToolUse', tool_name: toolName, tool_input: toolInput });
   const notes: GateNotes = {};
-  for (const argv of gates as string[][]) {
+  for (const argv of gates) {
     const { code, stdout, stderr, reason } = await runGate(argv, input, env);
     if (code === 2) {
       throw new LinkError(`Blocked by a pre-publish gate. Nothing was sent. ${stderr.trim().slice(0, 2000)}`);
@@ -73,13 +90,8 @@ export async function runGates(
       (notes.gate_could_not_verify ??= []).push(`${basename(argv[1] ?? argv[0])}: ${reason}`);
       continue;
     }
-    let warning: unknown;
-    try {
-      warning = JSON.parse(stdout)?.hookSpecificOutput?.additionalContext;
-    } catch {
-      // No JSON on stdout: a plain pass.
-    }
-    if (typeof warning === 'string' && warning !== '') (notes.gate_warnings ??= []).push(warning);
+    const warning = warningOf(stdout);
+    if (warning !== undefined) (notes.gate_warnings ??= []).push(warning);
   }
   return notes;
 }

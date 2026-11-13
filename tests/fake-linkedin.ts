@@ -5,9 +5,9 @@
 import { mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import type { Config, HelperResult, Spec, Transport } from '../src/linkedin.ts';
+import type { Config, HelperResult, Spec, Transport } from '../src/core.ts';
 
-export const SUB = 'fakeMember123';
+const SUB = 'fakeMember123';
 export const AUTHOR = `urn:li:person:${SUB}`;
 export const POST_URN = 'urn:li:share:7000000000000000001';
 export const IMAGE_UPLOAD_URL = 'https://www.linkedin.com/dms-uploads/IMG1/uploaded-image/0?ut=fake1';

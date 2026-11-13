@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 // The ledger: one JSON line per published post or comment, appended to LINK_HOME/ledger.jsonl and never rewritten. It holds what
 // was posted and where, never the token.
+import { createHash } from 'node:crypto';
 import { appendFileSync, mkdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
@@ -23,9 +24,23 @@ export interface LedgerEntry {
 const FILE = 'ledger.jsonl';
 
 /** Appends one line. Creates the folder for its owner only (700) and the file for its owner only (600). */
-export function appendLedger(home: string, entry: LedgerEntry): void {
+function appendLedger(home: string, entry: LedgerEntry): void {
   mkdirSync(home, { recursive: true, mode: 0o700 });
   appendFileSync(join(home, FILE), `${JSON.stringify(entry)}\n`, { mode: 0o600 });
+}
+
+/**
+ * Appends the line for a post or comment that went out and says how that went: 'written', or why not. It never
+ * throws, because the post is live by now and an error here would invite a second one. `text` is what was posted.
+ */
+export function recordLedger(home: string, entry: Omit<LedgerEntry, 'chars' | 'sha256'>, text: string): string {
+  try {
+    const { time, kind, urn, url, media } = entry;
+    appendLedger(home, { time, kind, urn, url, chars: text.length, sha256: createHash('sha256').update(text).digest('hex'), media });
+    return 'written';
+  } catch {
+    return `not written: could not append to ${join(home, FILE)}`;
+  }
 }
 
 /** The last `count` lines, oldest first, each parsed; a line that is not JSON comes back as its text. No file: none. */
