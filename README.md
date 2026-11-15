@@ -2,6 +2,8 @@
 
 A local MCP server that lets Claude post and comment on LinkedIn for you, through LinkedIn's official API, with every write approved by you in a macOS dialog. macOS only. Not affiliated with LinkedIn or Anthropic.
 
+Brand: [Colorado Startups brand guide](https://colorado-startups.github.io/brand/)
+
 ```mermaid
 flowchart LR
   C[Claude] -->|tool call| L[Link server]
