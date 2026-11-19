@@ -9,7 +9,7 @@ workflows:
         - 'actions/deploy-pages@v5.0.1'
         - 'actions/setup-node@v7.1.0'
         - 'actions/upload-pages-artifact@v5.0.0'
-        - 'soulcraft-org/git-crafter@v7.0.0'
+        - 'soulcraft-org/git-crafter@v7.0.2'
     '.github/workflows/scorecard.yml':
         - 'actions/checkout@v7.0.1'
         - 'github/codeql-action@v4.39.3'
@@ -62,9 +62,9 @@ dependencies:
         commit: 'sha1-fa7117db83c52d787ae5a89f350999701505d78e'
         owner_id: 67707773
         repo_id: 421101922
-    'soulcraft-org/git-crafter@v7.0.0':
-        ref: 'v7.0.0'
-        commit: 'sha1-a9d6b45b7e5ac54091123e2cda1efcfcd2f63696'
+    'soulcraft-org/git-crafter@v7.0.2':
+        ref: 'v7.0.2'
+        commit: 'sha1-8023bd4683416f6d420bd20d137960b09c06b91e'
         owner_id: 343296826
         repo_id: 1454989683
         uses:
