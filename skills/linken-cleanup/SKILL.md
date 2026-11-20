@@ -22,6 +22,33 @@ flowchart LR
 | 4. Check | Open the profile; pass what it shows to `connections_check` |
 | 5. Remove | On REMOVE the member opens More, Remove connection, then you `connections_mark` `removed` |
 
+## The Connections-list lane
+
+When you filter the list by place instead of opening each profile, use `connections_check_list` for the checks. Pacing is unchanged.
+
+```mermaid
+flowchart TD
+  O[My Network, Connections] --> F[Filter Locations to one place you do not protect]
+  F --> R[Read one screen: profile link, name, headline]
+  R --> K[connections_check_list]
+  K -->|SKIP| T[Leave the row]
+  K -->|REMOVE| W[Wait per connections_next] --> X[More, Remove connection, confirm] --> M[connections_mark removed]
+  M -->|next REMOVE row, then next screen| W
+  X -->|CAPTCHA, check, warning, logout or failed removal| H[Stop: connections_mark warning]
+```
+
+| Step | Do |
+| --- | --- |
+| 1. Open | My Network, Connections |
+| 2. Filter | Locations: one place you do not protect (never a place in your `places` list) |
+| 3. Read | One screen of rows: profile link, name, headline, and the location if the row shows it |
+| 4. Check | `connections_check_list` with up to 40 rows; it returns REMOVE or SKIP with a reason per row and records nothing |
+| 5. Remove | For each REMOVE: wait as `connections_next` says, More, Remove connection, confirm, then `connections_mark` `removed` |
+| 6. Stop | On any CAPTCHA, check, warning, logout or failed removal: `connections_mark` `warning` and stop |
+| 7. Verify | Compare the total connection count in the page header before and after. The filtered count lags, so never use it |
+
+`connections_summary` shows the queue, today and this sitting against their caps, and the last warning.
+
 | Cap | Value |
 | --- | --- |
 | Per day | 25, then 50 from day 4, 80 from day 8 since the last warning |

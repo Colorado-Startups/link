@@ -15,7 +15,7 @@ import { z } from 'zod';
 import { archiveLoad } from './archive.ts';
 import { macDesk, type Desk } from './desk.ts';
 import { inboxMark, inboxNext, replyOpen } from './inbox.ts';
-import { connectionsCheck, connectionsList, connectionsMark, connectionsNext, refuseWhileHalted } from './connections.ts';
+import { connectionsCheck, connectionsCheckList, connectionsList, connectionsMark, connectionsNext, connectionsSummary, refuseWhileHalted } from './connections.ts';
 import { runGates } from './gates.ts';
 import { configFrom, LinkError, type Config, type Transport } from './core.ts';
 import { commentCreate } from './comments.ts';
@@ -174,7 +174,7 @@ function registerArchiveTools({ server, config, env }: Deps): void {
   );
 }
 
-/** Registers connections_mark, connections_next and connections_check. */
+/** Registers connections_mark, connections_next, connections_check, connections_summary and connections_check_list. */
 function registerConnectionTools({ server, config, env }: Deps): void {
   server.registerTool(
     'connections_mark',
@@ -220,6 +220,36 @@ function registerConnectionTools({ server, config, env }: Deps): void {
       annotations: { readOnlyHint: true, ...local },
     },
     (input) => run(env, async () => connectionsCheck(input, config, env)),
+  );
+
+  server.registerTool(
+    'connections_summary',
+    {
+      title: 'Connections clean-up summary',
+      description:
+        'Returns counts by tier, reason and state, the queue (REMOVE rows with a URL and no state), today and this sitting against their caps, the last removal and warning, days since the warning, and whether the halt file exists. It reads local files only.',
+      inputSchema: z.strictObject({}),
+      annotations: { readOnlyHint: true, ...local },
+    },
+    () => run(env, async () => connectionsSummary(config, env)),
+  );
+
+  server.registerTool(
+    'connections_check_list',
+    {
+      title: 'Check a screen of the Connections list',
+      description:
+        'For the Connections-list lane: takes up to 40 rows read from one screen of My Network, Connections (profile link, name, headline, optional location) and returns one REMOVE or SKIP verdict with a reason per row, by the same rules as connections_check. List rows are 1st degree, so there is no degree, and a missing location is allowed. It records nothing; pacing stays with connections_next and connections_mark.',
+      inputSchema: z.strictObject({
+        rows: z
+          .array(z.strictObject({ url, name: z.string(), headline: z.string(), location: z.string().optional() }))
+          .min(1)
+          .max(40)
+          .describe('One screen of the list, in order.'),
+      }),
+      annotations: { readOnlyHint: true, ...local },
+    },
+    (input) => run(env, async () => connectionsCheckList(input, config, env)),
   );
 }
 

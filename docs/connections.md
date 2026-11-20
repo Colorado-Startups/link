@@ -5,7 +5,7 @@ flowchart LR
   E[export zip] --> A[archive_load: rate] --> N[connections_next: pace] --> C[connections_check] -->|REMOVE| Y[you remove in LinkedIn] --> M[connections_mark]
 ```
 
-Link rates your connections from your own LinkedIn data export (Settings, Data privacy, Get a copy of your data). It reads local files only, never talks to LinkedIn, and removes nothing. Tools: `archive_load`, `connections_list`, `connections_mark`, `connections_next`, `connections_check`.
+Link rates your connections from your own LinkedIn data export (Settings, Data privacy, Get a copy of your data). It reads local files only, never talks to LinkedIn, and removes nothing. Tools: `archive_load`, `connections_list`, `connections_mark`, `connections_next`, `connections_check`, `connections_check_list`, `connections_summary`.
 
 | # | Rule, first match wins | Tier, reason |
 |---|---|---|
@@ -30,6 +30,31 @@ Default word lists: `rules/rater.default.json`. `LINKEN_RATER` names a JSON over
 | 8 on | 80 | 40 |
 
 A sitting ends after 30 minutes idle. Days are your local calendar days. `connections_next` waits 15 to 45 seconds after the last removal or skip. A corrupt `removals.json` is an error naming the file, not an empty history. A `warning` mark writes `LINKEN_HALT_FILE`; while it exists, `connections_next`, `post_publish`, `comment_create` and `reply_open` refuse until you delete it.
+
+## The Connections-list lane
+
+```mermaid
+flowchart TD
+  O[My Network, Connections] --> F[Filter Locations to one place you do not protect]
+  F --> R[Read one screen: profile link, name, headline]
+  R --> K[connections_check_list]
+  K -->|SKIP| T[Leave the row]
+  K -->|REMOVE| W[Wait per connections_next] --> X[More, Remove connection, confirm] --> M[connections_mark removed]
+  M -->|next REMOVE row, then next screen| W
+  X -->|CAPTCHA, check, warning, logout or failed removal| H[Stop: connections_mark warning]
+```
+
+| Step | Do |
+| --- | --- |
+| 1. Open | My Network, Connections |
+| 2. Filter | Locations: one place you do not protect (never a place in your `places` list) |
+| 3. Read | One screen of rows: profile link, name, headline, and the location if the row shows it |
+| 4. Check | `connections_check_list` with up to 40 rows; it returns REMOVE or SKIP with a reason per row and records nothing |
+| 5. Remove | For each REMOVE: wait as `connections_next` says, More, Remove connection, confirm, then `connections_mark` `removed` |
+| 6. Stop | On any CAPTCHA, check, warning, logout or failed removal: `connections_mark` `warning` and stop |
+| 7. Verify | Compare the total connection count in the page header before and after. The filtered count lags, so never use it |
+
+`connections_summary` shows the queue, today and this sitting against their caps, and the last warning.
 
 | Variable | Use |
 |---|---|

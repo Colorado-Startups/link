@@ -9,10 +9,10 @@ import { join } from 'node:path';
 import { POST_URN, fakeLinkedIn, liveConfig, reply } from './fake-linkedin.ts';
 import { call, rpc } from './rpc.ts';
 
-test('lists exactly the eleven tools, each with a title, a description and its annotations', async () => {
+test('lists exactly the thirteen tools, each with a title, a description and its annotations', async () => {
   const out = await rpc(liveConfig(), fakeLinkedIn().transport, 'tools/list');
   const tools = out.result.tools as { name: string; title: string; description: string; annotations: Record<string, unknown> }[];
-  assert.deepEqual(tools.map((tool) => tool.name), ['linken_status', 'post_publish', 'comment_create', 'archive_load', 'connections_list', 'connections_mark', 'connections_next', 'connections_check', 'inbox_next', 'inbox_mark', 'reply_open']);
+  assert.deepEqual(tools.map((tool) => tool.name), ['linken_status', 'post_publish', 'comment_create', 'archive_load', 'connections_list', 'connections_mark', 'connections_next', 'connections_check', 'connections_summary', 'connections_check_list', 'inbox_next', 'inbox_mark', 'reply_open']);
   for (const tool of tools) {
     assert.ok(tool.title, `${tool.name} has a title`);
     assert.ok(tool.description.length > 40, `${tool.name} has a description`);
