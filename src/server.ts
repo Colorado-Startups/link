@@ -197,7 +197,7 @@ function registerConnectionTools({ server, config, env }: Deps): void {
     {
       title: 'Next connection to remove',
       description:
-        'Returns the next connection in the REMOVE tier, in the order pitch, sales, empty, low, with the removals left today. It first checks the halt file, the daily cap (25, 50 or 80 as the days since the last warning go by) and the sitting cap (25, or 40 from day 8; a new sitting starts after 30 minutes idle), and waits a random 15 to 45 seconds since the last removal. It removes nothing and does not contact LinkedIn.',
+        'Returns the next connection to check, clear spam first and then borderline (never core or low), with its level and the removals left today. It first checks the halt file, the daily cap (25, 50 or 80 as the days since the last warning go by) and the sitting cap (25, or 40 from day 8; a new sitting starts after 30 minutes idle), and waits a random 15 to 45 seconds since the last removal. It removes nothing and does not contact LinkedIn.',
       inputSchema: z.strictObject({}),
       annotations: { readOnlyHint: false, ...local },
     },
@@ -209,13 +209,15 @@ function registerConnectionTools({ server, config, env }: Deps): void {
     {
       title: 'Check a profile before removal',
       description:
-        'Compares what a profile page shows with the stored connection and returns REMOVE or SKIP with a reason. SKIP when the connection is not in the REMOVE tier, the name differs, the degree is not 1st, the location is a rescue place from the rules, or the headline has mission words (for the reasons sales, empty and low). It reads local files only.',
+        'Compares what a profile page shows now with the stored connection and returns REMOVE or SKIP with its level (core, spam, borderline, low, nolink) and a reason. REMOVE needs live proof: spam still shown in the headline or company, a sales-pitch headline, or a bare profile (no headline, no company, fewer than bare_mutuals mutual connections). SKIP when the name differs, the degree is not 1st, a rescue place or mission words show, or the level is core or low. Pass company and mutuals; without them a bare profile is never removed. It reads local files only.',
       inputSchema: z.strictObject({
         url,
         name: z.string().describe('The name shown on the profile page.'),
         degree: z.string().describe('The connection degree shown on the page, for example "1st".'),
         location: z.string().describe('The location line on the profile page; empty when none.'),
         headline: z.string().describe('The headline on the profile page; empty when none.'),
+        company: z.string().optional().describe('The current company shown on the page; empty when none.'),
+        mutuals: z.number().int().min(0).optional().describe('The "N mutual connections" count; 0 when the page shows none.'),
       }),
       annotations: { readOnlyHint: true, ...local },
     },
@@ -227,7 +229,7 @@ function registerConnectionTools({ server, config, env }: Deps): void {
     {
       title: 'Connections clean-up summary',
       description:
-        'Returns counts by tier, reason and state, the queue (REMOVE rows with a URL and no state), today and this sitting against their caps, the last removal and warning, days since the warning, and whether the halt file exists. It reads local files only.',
+        'Returns counts by tier, reason, state and level, the queue (spam and borderline rows with a URL and no state), today and this sitting against their caps, the last removal and warning, days since the warning, and whether the halt file exists. It reads local files only.',
       inputSchema: z.strictObject({}),
       annotations: { readOnlyHint: true, ...local },
     },
@@ -239,10 +241,10 @@ function registerConnectionTools({ server, config, env }: Deps): void {
     {
       title: 'Check a screen of the Connections list',
       description:
-        'For the Connections-list lane: takes up to 40 rows read from one screen of My Network, Connections (profile link, name, headline, optional location) and returns one REMOVE or SKIP verdict with a reason per row, by the same rules as connections_check. List rows are 1st degree, so there is no degree, and a missing location is allowed. It records nothing; pacing stays with connections_next and connections_mark.',
+        'For the Connections-list lane: takes up to 40 rows read from one screen of My Network, Connections (profile link, name, headline, optional location, company and mutuals) and returns one REMOVE or SKIP verdict with a reason per row, by the same rules as connections_check. List rows are 1st degree, so there is no degree, and a missing location is allowed. It records nothing; pacing stays with connections_next and connections_mark.',
       inputSchema: z.strictObject({
         rows: z
-          .array(z.strictObject({ url, name: z.string(), headline: z.string(), location: z.string().optional() }))
+          .array(z.strictObject({ url, name: z.string(), headline: z.string(), location: z.string().optional(), company: z.string().optional(), mutuals: z.number().int().min(0).optional() }))
           .min(1)
           .max(40)
           .describe('One screen of the list, in order.'),

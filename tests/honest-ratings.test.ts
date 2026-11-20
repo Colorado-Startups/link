@@ -29,7 +29,7 @@ test('rows with no URL are REVIEW no_url, REMOVE rows are unchanged, and one sta
   const { dir, tool } = setup([
     `Ann,Blank,,,Acme,Analyst,1 Jan 2020`,
     `Bob,Blank,,,Acme,Analyst,1 Jan 2020`,
-    `Cy,Sales,${URL_OF('cy')},,Acme,Sales Manager,1 Jan 2020`,
+    `Cy,Sales,${URL_OF('cy')},,Acme Outsourcing,Sales Manager,1 Jan 2020`,
   ]);
   const out = (await tool('archive_load', { path: dir })).json;
   assert.equal(out.by_reason.no_url, 2);
@@ -46,6 +46,6 @@ test('a keep place beats a remove mark in connections_check', async () => {
   await tool('archive_load', { path: dir });
   await tool('connections_mark', { url: URL_OF('dee'), action: 'remove' });
   const page = { url: URL_OF('dee'), name: 'Dee Marked', degree: '1st', location: 'Austin, Texas', headline: 'Analyst' };
-  assert.deepEqual((await tool('connections_check', page)).json, { verdict: 'REMOVE', reason: 'override' });
+  assert.deepEqual((await tool('connections_check', page)).json, { verdict: 'REMOVE', level: 'spam', reason: 'override' });
   assert.match((await tool('connections_check', { ...page, location: 'Denver, Colorado' })).json.reason, /rescue place/);
 });

@@ -26,7 +26,7 @@ async function loaded(rows: string[]) {
 }
 
 const ROWS = [
-  `Pat,Pitch,${URL_OF('pat')},,Acme,Sales Manager,1 Jan 2020`,
+  `Pat,Pitch,${URL_OF('pat')},,Upwork,Sales Manager,1 Jan 2020`,
   `Sam,Sales,${URL_OF('sam')},,Acme,Head of Sales,1 Jan 2020`,
   `Lou,Low,${URL_OF('lou')},,Acme,Analyst,1 Jan 2020`,
 ];
@@ -39,7 +39,8 @@ test('connections_summary after one removed and one skipped mark', async () => {
   assert.deepEqual(s.by_tier, { REMOVE: 3 });
   assert.deepEqual(s.by_reason, { sales: 2, low: 1 });
   assert.deepEqual(s.by_state, { removed: 1, skipped: 1 });
-  assert.equal(s.queue, 1);
+  assert.deepEqual(s.by_level, { low: 1 });
+  assert.equal(s.queue, 0);
   assert.deepEqual(s.today, { done: 1, cap: 25 });
   assert.deepEqual(s.sitting, { done: 1, cap: 25 });
   assert.match(s.last_removed, /^\d{4}-\d\d-\d\dT/);
@@ -53,14 +54,14 @@ test('connections_check_list gives one verdict per row, with no degree and an op
   const tool = await loaded(ROWS);
   const out = await tool('connections_check_list', {
     rows: [
-      { url: URL_OF('pat'), name: 'Pat Pitch', headline: 'Sales lead' },
+      { url: URL_OF('pat'), name: 'Pat Pitch', headline: 'Freelance lead generation' },
       { url: URL_OF('sam'), name: 'Sam Sales', headline: 'Fusion researcher' },
       { url: URL_OF('lou'), name: 'Lou Low', headline: 'Analyst', location: 'Denver, Colorado' },
     ],
   });
   const v = out.json.verdicts;
   assert.equal(v.length, 3);
-  assert.deepEqual(v[0], { url: URL_OF('pat'), verdict: 'REMOVE', reason: 'sales' });
+  assert.deepEqual(v[0], { url: URL_OF('pat'), verdict: 'REMOVE', level: 'spam', reason: 'spam title or freelance site' });
   assert.match(v[1].reason, /mission/);
   assert.match(v[2].reason, /rescue place/);
   assert.deepEqual([v[1].verdict, v[2].verdict], ['SKIP', 'SKIP']);
