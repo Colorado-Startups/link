@@ -32,7 +32,7 @@ flowchart LR
 | 🛑 Halt file | Create `~/.linken/halt` and actions stop |
 | ⏱️ Pace caps | A daily cap and random gaps |
 | 🏠 Data stays on your Mac | Token in the Keychain, ledger in `~/.linken` |
-| 🚫 Removes nothing itself | You remove connections by hand |
+| 🚫 Removes nothing itself | You or your browser agent click Remove, one at a time |
 
 ## Links
 
