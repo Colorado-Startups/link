@@ -16,7 +16,7 @@ const LAUNCHER = fileURLToPath(new URL('../trusted/linken-linkedin', import.meta
 const PROBE = fileURLToPath(new URL('./fixtures/launcher-probe.mjs', import.meta.url));
 const VAR = 'LINKEDIN_ACCESS_TOKEN';
 const NODE_IN_LAUNCHER = '/opt/homebrew/bin/node';
-const HELPER_IN_LAUNCHER = '/usr/local/lib/link/linken-linkedin.mjs';
+const HELPER_IN_LAUNCHER = '/usr/local/lib/linken/linken-linkedin.mjs';
 /** A fake token with every kind of character the launcher lets through. */
 const FAKE_TOKEN = 'AQX.fake_token:for+tests/0123456789=-';
 const NO_DASH = existsSync('/bin/dash') ? false : '/bin/dash is missing on this machine';

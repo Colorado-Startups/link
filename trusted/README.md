@@ -22,7 +22,7 @@ flowchart LR
 | Source | Target | Mode |
 | --- | --- | --- |
 | [linken-linkedin](linken-linkedin) (the launcher) | `/usr/local/bin/linken-linkedin` | root 755 |
-| [linken-linkedin.mjs](linken-linkedin.mjs) | `/usr/local/lib/link/linken-linkedin.mjs` | root 644 |
+| [linken-linkedin.mjs](linken-linkedin.mjs) | `/usr/local/lib/linken/linken-linkedin.mjs` | root 644 |
 | [linken-token](linken-token) (hidden dialog → Keychain) | `/usr/local/bin/linken-token` | root 755 |
 
 `install.sh` refuses a Node the member can write. The launcher refuses a token outside `A-Za-z0-9._:+/=-` (exit 4); its other checks are under Guarantees.
