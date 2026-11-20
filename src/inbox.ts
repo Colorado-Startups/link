@@ -3,12 +3,11 @@
 // LINKEN_HOME/inbox.json; inbox_next reads it, newest first; inbox_mark records done, skip or spam in inbox-marks.json
 // (600), so a re-load keeps them; reply_open puts a reply on the clipboard and opens the thread. LinkedIn has no
 // messaging API for this app and its User Agreement 8.2 bars bots that send messages, so the member presses Enter.
-import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { refuseWhileHalted } from './connections.ts';
 import type { Desk } from './desk.ts';
 import { LinkError, type Config } from './core.ts';
-import { writeJson } from './store.ts';
+import { readJson, writeJson } from './store.ts';
 
 type Env = Record<string, string | undefined>;
 type Message = Record<string, string>;
@@ -47,16 +46,6 @@ export function waitingThreads(threads: Map<string, Message[]>, mine: (m: Messag
 
 /** Saves the waiting threads as LINKEN_HOME/inbox.json, for the owner only. */
 export const writeInbox = (config: Config, threads: Thread[]) => writeJson(inboxFile(config), threads);
-
-function readJson<T>(path: string, missing: () => T): T {
-  try {
-    return JSON.parse(readFileSync(path, 'utf8')) as T;
-  } catch (error) {
-    // Only a missing file is empty: a corrupt one would let the next write drop every earlier mark.
-    if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw new LinkError(`${path} is not readable JSON. Fix or delete it.`);
-    return missing();
-  }
-}
 
 const loaded = (config: Config) =>
   readJson<Thread[]>(inboxFile(config), () => {
