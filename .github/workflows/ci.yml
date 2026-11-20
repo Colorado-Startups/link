@@ -21,12 +21,5 @@ jobs:
     uses: SoulCraft-Org/git-crafter/.github/workflows/ci-standard.yml@8023bd4683416f6d420bd20d137960b09c06b91e # v7.0.2
     with:
       node-version: "26"
-      paths: |
-        src/**
-        trusted/**
-        tests/**
-        quality/**
-        package.json
-        package-lock.json
       # The whole suite: Node's own test runner against a fake LinkedIn, seconds of work, no network.
       short: npm test

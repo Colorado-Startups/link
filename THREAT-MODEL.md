@@ -1,6 +1,6 @@
 # Threat model
 
-The one asset is the member's LinkedIn token, and with it the power to post as them. Reviewed 2026-11-13.
+The one asset is the member's LinkedIn token, and with it the power to post as them. Reviewed 2026-11-19.
 
 ```mermaid
 flowchart LR
@@ -25,6 +25,7 @@ flowchart LR
 | The token sent to another host | Host pinning; no redirects; 3 headers at most | `tests/helper.test.ts` |
 | A message in the inbox steers Claude | Message text is returned as quoted data; Link sends no message | `skills/link-inbox` |
 | A fork's PR changes trusted code | `tools/merge_policy.json`: maintainer only | `CODEOWNERS` |
+| Member data committed to the public repo | A test fails on any non-`example-` profile link or export file in a tracked file | `tests/privacy.test.ts` |
 
 | Accepted risk | Why |
 |---|---|
