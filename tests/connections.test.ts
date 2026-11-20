@@ -151,7 +151,7 @@ test('re-loading keeps marks and removed states, and next returns rows in reason
   await tool('archive_load', { path: folder });
   await tool('connections_mark', { url: URL_OF('lou'), action: 'keep' });
   await tool('connections_mark', { url: URL_OF('pat'), action: 'removed' });
-  assert.equal((await tool('connections_next')).json.reason, 'sales');
+  assert.equal((await tool('connections_next')).json.reason, 'empty');
   await tool('archive_load', { path: folder });
   const rows = (await tool('connections_list', { limit: 100 })).json.rows;
   assert.equal(rows.find((r: { name: string }) => r.name === 'Lou Low').reason, 'override');
@@ -165,13 +165,17 @@ test('connections_check: REMOVE only when the page agrees with the export', asyn
   await tool('archive_load', { path: exportFolder() });
   const page = { url: URL_OF('sam'), name: 'Sam Sales', degree: '1st', location: 'Austin, Texas', headline: 'Sales lead' };
   const verdict = async (over: Record<string, string>) => (await tool('connections_check', { ...page, ...over })).json;
-  assert.deepEqual(await verdict({}), { verdict: 'REMOVE', reason: 'sales' });
+  assert.deepEqual(await verdict({}), { verdict: 'SKIP', level: 'low', reason: 'low: an ordinary sales job' });
   assert.match((await verdict({ name: 'Someone Else' })).reason, /name/);
   assert.match((await verdict({ degree: '2nd' })).reason, /1st/);
   assert.match((await verdict({ location: 'Denver, Colorado' })).reason, /rescue place/);
   assert.match((await verdict({ headline: 'Fusion researcher' })).reason, /mission/);
   assert.equal((await verdict({ url: URL_OF('pat'), name: 'Pat Pitch', headline: 'Fusion researcher' })).verdict, 'REMOVE');
-  assert.match((await verdict({ url: URL_OF('tom'), name: 'Tom Thread' })).reason, /not in the REMOVE tier/);
+  assert.match((await verdict({ url: URL_OF('tom'), name: 'Tom Thread' })).reason, /^core: thread/);
+  const nia = { url: URL_OF('nia'), name: 'Nia Nobody', headline: '', company: '' };
+  assert.equal((await tool('connections_check', { ...page, ...nia, mutuals: 3 })).json.verdict, 'REMOVE');
+  assert.equal((await tool('connections_check', { ...page, ...nia, mutuals: 40 })).json.verdict, 'SKIP');
+  assert.match((await tool('connections_check', { ...page, ...nia })).json.reason, /no live proof/);
   assert.match((await verdict({ url: URL_OF('zed') })).reason, /not in the loaded/);
 });
 

@@ -7,8 +7,6 @@ import { readFileSync } from 'node:fs';
 import { parseCsv } from './csv.ts';
 
 type Tier = 'PROTECTED' | 'KEEP' | 'REVIEW' | 'REMOVE';
-/** The order connections_next removes in: the owner's own marks first, then the likeliest pitches. */
-export const REASON_ORDER = ['override', 'pitch', 'sales', 'empty', 'low'];
 
 export interface Rules {
   new_days: number;
@@ -18,6 +16,13 @@ export interface Rules {
   mission: string[];
   places: string[];
   keep_files: string[];
+  /** Levels (src/levels.ts): clear-spam titles and companies, seller companies and headlines, and the mutual
+   *  connections below which a bare profile counts as incomplete. */
+  spam_titles: string[];
+  spam_companies: string[];
+  seller_companies: string[];
+  seller_headlines: string[];
+  bare_mutuals: number;
 }
 
 /** What the export says about one connection. `connected` is YYYY-MM-DD or empty. */

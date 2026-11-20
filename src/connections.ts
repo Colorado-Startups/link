@@ -7,7 +7,8 @@ import { chmodSync, existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { LinkError, type Config } from './core.ts';
 import { connectionsFile, readConnections, readJson, writeJson, type Connection } from './store.ts';
-import { hasWord, loadRules, normUrl, REASON_ORDER } from './rater.ts';
+import { loadRules, normUrl } from './rater.ts';
+import { LEVEL_ORDER, levelOf, liveVerdict } from './levels.ts';
 
 type Env = Record<string, string | undefined>;
 interface Event {
@@ -104,7 +105,7 @@ export function pace(all: Event[], now: Date, env: Env = {}) {
 /** LINKEN_GAP as [min, max] seconds; anything that is not "min-max" gives the default 15-45. */
 export const gapRange = (raw: string | undefined): number[] => (/^\d+(\.\d+)?-\d+(\.\d+)?$/.test(raw ?? '') ? raw! : '15-45').split('-').map(Number);
 
-/** The next connection to remove, in REASON_ORDER, after the halt, daily, sitting and gap checks. */
+/** The next connection to remove, clear spam before borderline (src/levels.ts), after the halt, daily, sitting and gap checks. */
 export async function connectionsNext(config: Config, env: Env) {
   refuseWhileHalted(env, config);
   const p = pace(events(config), new Date(), env);
@@ -113,11 +114,12 @@ export async function connectionsNext(config: Config, env: Env) {
   const [lo, hi] = gapRange(env.LINKEN_GAP);
   const gap = (lo + Math.random() * (hi - lo)) * 1000 - (p.lastActed ? Date.now() - Date.parse(p.lastActed) : Infinity);
   if (gap > 0) await new Promise((done) => setTimeout(done, gap));
-  const rows = readConnections(config).filter((c) => c.tier === 'REMOVE' && !c.state && c.url);
-  for (const reason of REASON_ORDER) {
-    const c = rows.find((r) => r.reason === reason);
+  const rules = loadRules(env);
+  const rows = readConnections(config).filter((c) => !c.state && c.url);
+  for (const level of LEVEL_ORDER) {
+    const c = rows.find((r) => levelOf(r, rules)[0] === level);
     if (c) {
-      return { name: name(c), position: c.position, company: c.company, connected_on: c.connected, reason: c.reason, url: c.url, remaining_today: p.dailyCap - p.doneToday };
+      return { name: name(c), position: c.position, company: c.company, connected_on: c.connected, level, reason: c.reason, url: c.url, remaining_today: p.dailyCap - p.doneToday };
     }
   }
   return { done: true, remaining_today: p.dailyCap - p.doneToday };
@@ -125,7 +127,7 @@ export async function connectionsNext(config: Config, env: Env) {
 
 const plain = (s: string) => s.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase().replace(/[^a-z0-9 ]+/g, ' ').trim();
 
-type Page = { url: string; name: string; degree?: string; location?: string; headline: string };
+type Page = { url: string; name: string; degree?: string; location?: string; headline: string; company?: string; mutuals?: number };
 
 /** Why the page is not this connection's profile (its name, or a degree other than 1st when one is given), or undefined when it is. */
 function notThisProfile(c: Connection, page: Page): string | undefined {
@@ -135,24 +137,14 @@ function notThisProfile(c: Connection, page: Page): string | undefined {
   return undefined;
 }
 
-/** Why the page's location or headline rescues the connection from removal, or undefined when nothing does. */
-function rescuedBy(c: Connection, page: Page, env: Env): string | undefined {
-  const rules = loadRules(env);
-  if (hasWord(page.location ?? '', rules.places)) return 'rescue place in the location';
-  if (['sales', 'empty', 'low'].includes(c.reason) && hasWord(page.headline, rules.mission)) return 'mission words in the headline';
-  return undefined;
-}
-
 /** REMOVE or SKIP for one page against its stored connection (undefined when the URL is not loaded). */
 function verdictFor(c: Connection | undefined, page: Page, env: Env) {
   const skip = (reason: string) => ({ verdict: 'SKIP', reason });
   if (!c) return skip('not in the loaded connections');
-  if (c.tier !== 'REMOVE' || c.state) return skip(`not in the REMOVE tier (${c.state ?? c.tier})`);
+  if (c.state) return skip(`already ${c.state}`);
   const mismatch = notThisProfile(c, page);
   if (mismatch) return skip(mismatch);
-  const rescue = rescuedBy(c, page, env);
-  if (rescue) return skip(rescue);
-  return { verdict: 'REMOVE', reason: c.reason };
+  return liveVerdict(c, page, loadRules(env));
 }
 
 /** REMOVE or SKIP for one profile page, from what the page shows. The export has no location or headline. */
@@ -171,6 +163,7 @@ const countOf = (values: string[]) => values.reduce<Record<string, number>>((n, 
 /** The state of the clean-up in one call: counts, the queue, today's and this sitting's progress against the caps, and the last warning. */
 export function connectionsSummary(config: Config, env: Env) {
   const rows = readConnections(config);
+  const rules = loadRules(env);
   const all = events(config);
   const p = pace(all, new Date(), env);
   const warning = all.findLast((e) => e.action === 'warning')?.time;
@@ -179,7 +172,8 @@ export function connectionsSummary(config: Config, env: Env) {
     by_tier: countOf(rows.map((c) => c.tier)),
     by_reason: countOf(rows.map((c) => c.reason)),
     by_state: countOf(rows.flatMap((c) => (c.state ? [c.state] : []))),
-    queue: rows.filter((c) => c.tier === 'REMOVE' && c.url && !c.state).length,
+    by_level: countOf(rows.filter((c) => !c.state).map((c) => levelOf(c, rules)[0])),
+    queue: rows.filter((c) => !c.state && c.url && LEVEL_ORDER.includes(levelOf(c, rules)[0])).length,
     today: { done: p.doneToday, cap: p.dailyCap },
     sitting: { done: p.doneSitting, cap: p.sittingCap },
     last_removed: all.findLast((e) => e.action === 'removed')?.time ?? null,
