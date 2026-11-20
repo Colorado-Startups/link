@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// A contract double of the trusted helper (trusted/link-linkedin.mjs) for tests/e2e.test.ts. Like the real helper it
+// A contract double of the trusted helper (trusted/linken-linkedin.mjs) for tests/e2e.test.ts. Like the real helper it
 // reads ONE spec on stdin and writes ONE result line on stdout, exit 0, as after LinkedIn answered. First it appends
 // the spec as one JSON line to the file after --log: an argument, since the server gives a helper a minimal
 // environment. No network, no token, no dialog. Every value is made up.

@@ -9,7 +9,7 @@ import { mkdtempSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { needsApproval, validateSpec } from '../trusted/link-linkedin.mjs';
+import { needsApproval, validateSpec } from '../trusted/linken-linkedin.mjs';
 
 type Message = Record<string, any>;
 

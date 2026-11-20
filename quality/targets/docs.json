@@ -38,8 +38,8 @@
           "doc": "docs/setup.md",
           "area": [
             "install.sh",
-            "trusted/link-linkedin",
-            "trusted/link-token",
+            "trusted/linken-linkedin",
+            "trusted/linken-token",
             ".claude-plugin/plugin.json"
           ]
         },

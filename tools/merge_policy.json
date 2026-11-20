@@ -90,7 +90,7 @@
         "tests/comments.test.ts"
       ],
       [
-        "trusted/link-token"
+        "trusted/linken-token"
       ],
       [
         "src/linkedin.ts"
