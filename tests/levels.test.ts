@@ -24,7 +24,7 @@ test('levelOf: core, spam, borderline, low and nolink from the export', () => {
     ['spam title', { reason: 'low', position: 'Virtual Assistant' }, 'spam'],
     ['empty', { reason: 'empty', position: '', company: '' }, 'borderline'],
     ['agency seller', { reason: 'sales', position: 'Sales Manager', company: 'Acme Outsourcing' }, 'borderline'],
-    ['ordinary sales job', { reason: 'sales', position: 'Head of Sales', company: 'Acme' }, 'low'],
+    ['sales title', { reason: 'sales', position: 'Head of Sales', company: 'Acme' }, 'seller'],
     ['no contact for years', { reason: 'low' }, 'low'],
   ];
   for (const [label, over, level] of cases) assert.equal(levelOf(row(over), RULES)[0], level, label);
@@ -48,4 +48,14 @@ test('liveVerdict: REMOVE only with live proof, and the page can always keep som
   assert.equal(v({ reason: 'pitch' }, { headline: 'Angel investor' }), 'SKIP');
   assert.equal(v({ reason: 'sales', position: 'Head of Sales' }, { headline: '' }), 'SKIP');
   assert.equal(v({ tier: 'PROTECTED', reason: 'thread' }, { mutuals: 0 }), 'SKIP');
+});
+
+test('sellers: kept unless the rules opt in, then removed only while the headline still sells', () => {
+  const seller = row({ reason: 'sales', position: 'Account Executive', company: 'Acme' });
+  const opted = { ...RULES, also_remove: ['seller'] };
+  const v = (rules: typeof RULES, headline: string) => liveVerdict(seller, { headline }, rules);
+  assert.deepEqual(v(RULES, 'Account Executive at Acme'), { verdict: 'SKIP', level: 'seller', reason: 'seller: a sales title' });
+  assert.deepEqual(v(opted, 'Account Executive at Acme'), { verdict: 'REMOVE', level: 'seller', reason: 'still selling' });
+  assert.equal(v(opted, 'Operations lead at Acme').reason, 'the headline no longer sells');
+  assert.equal(v(opted, 'Founder, account executive by trade').verdict, 'SKIP');
 });

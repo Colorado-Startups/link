@@ -151,6 +151,7 @@ test('re-loading keeps marks and removed states, and next returns rows in reason
   await tool('archive_load', { path: folder });
   await tool('connections_mark', { url: URL_OF('lou'), action: 'keep' });
   await tool('connections_mark', { url: URL_OF('pat'), action: 'removed' });
+  assert.match((await tool('connections_mark', { url: URL_OF('pat'), action: 'skipped' })).text, /removal is final/);
   assert.equal((await tool('connections_next')).json.reason, 'empty');
   await tool('archive_load', { path: folder });
   const rows = (await tool('connections_list', { limit: 100 })).json.rows;
@@ -165,7 +166,7 @@ test('connections_check: REMOVE only when the page agrees with the export', asyn
   await tool('archive_load', { path: exportFolder() });
   const page = { url: URL_OF('sam'), name: 'Sam Sales', degree: '1st', location: 'Austin, Texas', headline: 'Sales lead' };
   const verdict = async (over: Record<string, string>) => (await tool('connections_check', { ...page, ...over })).json;
-  assert.deepEqual(await verdict({}), { verdict: 'SKIP', level: 'low', reason: 'low: an ordinary sales job' });
+  assert.deepEqual(await verdict({}), { verdict: 'SKIP', level: 'seller', reason: 'seller: a sales title' });
   assert.match((await verdict({ name: 'Someone Else' })).reason, /name/);
   assert.match((await verdict({ degree: '2nd' })).reason, /1st/);
   assert.match((await verdict({ location: 'Denver, Colorado' })).reason, /rescue place/);

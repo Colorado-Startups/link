@@ -15,7 +15,11 @@ flowchart TD
   K -->|yes| CORE[🟢 Core: never removed]
   K -->|no| S{Clear spam?<br/>spam title, freelance site,<br/>pitch you never answered}
   S -->|no| B{Empty in the export,<br/>or seller at an agency?}
-  B -->|no| LOW[⚪ Low: kept]
+  B -->|no| SE{🟣 Seller, and you opted in?}
+  SE -->|no| LOW[⚪ Low: kept]
+  SE -->|yes| SEL{Headline still sells?}
+  SEL -->|yes| R
+  SEL -->|no| SK
   S -->|yes| SL{Page still shows spam?}
   B -->|yes| BL{Page shows a pitch headline,<br/>or a bare profile with<br/>fewer than 10 mutuals?}
   SL -->|yes| R[🗑️ REMOVE, paced]
@@ -29,7 +33,8 @@ flowchart TD
 | 🟢 Core | You started a thread or wrote twice, endorsements or recommendations either way, keep lists, connected in the last 90 days, a `places` match, `mission` words | Never removed |
 | 🔴 Spam | Your remove mark, a pitch you never answered, `spam_titles`, `spam_companies` | Checked first. Removed only if the page still shows it (marks and pitches need no page proof) |
 | 🟠 Borderline | Empty title and company in the export, or a `sales` title at a `seller_companies` company | Removed only on a `seller_headlines` headline, or a bare page: no headline, no company and fewer than `bare_mutuals` mutual connections |
-| ⚪ Low | Everything else, including ordinary sales jobs and people you have not talked to in years | Kept |
+| 🟣 Seller | A `sales` title, no keep word | Kept, unless your rules say `"also_remove": ["seller"]`; then removed only while the headline still sells |
+| ⚪ Low | Everything else, including people you have not talked to in years | Kept |
 | ⛔ No link | Export rows with no profile URL | Never matched, never removed |
 
 | On the page | Always wins |
