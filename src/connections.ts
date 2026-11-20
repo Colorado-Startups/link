@@ -125,33 +125,66 @@ export async function connectionsNext(config: Config, env: Env) {
 
 const plain = (s: string) => s.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase().replace(/[^a-z0-9 ]+/g, ' ').trim();
 
-type Page = { url: string; name: string; degree: string; location: string; headline: string };
+type Page = { url: string; name: string; degree?: string; location?: string; headline: string };
 
-/** Why the page is not this connection's profile (its name, or a degree other than 1st), or undefined when it is. */
+/** Why the page is not this connection's profile (its name, or a degree other than 1st when one is given), or undefined when it is. */
 function notThisProfile(c: Connection, page: Page): string | undefined {
   const shown = plain(page.name);
   if (!shown.includes(plain(c.first)) || !shown.includes(plain(c.last))) return 'name on the page differs from the export';
-  if (!/^1(st)?\b/i.test(page.degree.trim())) return 'not a 1st-degree connection';
+  if (page.degree !== undefined && !/^1(st)?\b/i.test(page.degree.trim())) return 'not a 1st-degree connection';
   return undefined;
 }
 
 /** Why the page's location or headline rescues the connection from removal, or undefined when nothing does. */
 function rescuedBy(c: Connection, page: Page, env: Env): string | undefined {
   const rules = loadRules(env);
-  if (hasWord(page.location, rules.places)) return 'rescue place in the location';
+  if (hasWord(page.location ?? '', rules.places)) return 'rescue place in the location';
   if (['sales', 'empty', 'low'].includes(c.reason) && hasWord(page.headline, rules.mission)) return 'mission words in the headline';
   return undefined;
 }
 
-/** REMOVE or SKIP for one profile page, from what the page shows. The export has no location or headline. */
-export function connectionsCheck(input: Page, config: Config, env: Env) {
+/** REMOVE or SKIP for one page against its stored connection (undefined when the URL is not loaded). */
+function verdictFor(c: Connection | undefined, page: Page, env: Env) {
   const skip = (reason: string) => ({ verdict: 'SKIP', reason });
-  const c = readConnections(config).find((r) => r.url === normUrl(input.url));
   if (!c) return skip('not in the loaded connections');
   if (c.tier !== 'REMOVE' || c.state) return skip(`not in the REMOVE tier (${c.state ?? c.tier})`);
-  const mismatch = notThisProfile(c, input);
+  const mismatch = notThisProfile(c, page);
   if (mismatch) return skip(mismatch);
-  const rescue = rescuedBy(c, input, env);
+  const rescue = rescuedBy(c, page, env);
   if (rescue) return skip(rescue);
   return { verdict: 'REMOVE', reason: c.reason };
+}
+
+/** REMOVE or SKIP for one profile page, from what the page shows. The export has no location or headline. */
+export function connectionsCheck(input: Page, config: Config, env: Env) {
+  return verdictFor(readConnections(config).find((r) => r.url === normUrl(input.url)), input, env);
+}
+
+/** One verdict per row of one screen of the Connections list. List rows are 1st degree by definition, and a missing location is allowed. Records nothing. */
+export function connectionsCheckList(input: { rows: Omit<Page, 'degree'>[] }, config: Config, env: Env) {
+  const all = readConnections(config);
+  return { verdicts: input.rows.map((r) => ({ url: r.url, ...verdictFor(all.find((c) => c.url === normUrl(r.url)), r, env) })) };
+}
+
+const countOf = (values: string[]) => values.reduce<Record<string, number>>((n, v) => ((n[v] = (n[v] ?? 0) + 1), n), {});
+
+/** The state of the clean-up in one call: counts, the queue, today's and this sitting's progress against the caps, and the last warning. */
+export function connectionsSummary(config: Config, env: Env) {
+  const rows = readConnections(config);
+  const all = events(config);
+  const p = pace(all, new Date(), env);
+  const warning = all.findLast((e) => e.action === 'warning')?.time;
+  const days = (iso: string) => Math.round((Date.parse(`${day(new Date())}T00:00:00Z`) - Date.parse(`${day(iso)}T00:00:00Z`)) / 86_400_000);
+  return {
+    by_tier: countOf(rows.map((c) => c.tier)),
+    by_reason: countOf(rows.map((c) => c.reason)),
+    by_state: countOf(rows.flatMap((c) => (c.state ? [c.state] : []))),
+    queue: rows.filter((c) => c.tier === 'REMOVE' && c.url && !c.state).length,
+    today: { done: p.doneToday, cap: p.dailyCap },
+    sitting: { done: p.doneSitting, cap: p.sittingCap },
+    last_removed: all.findLast((e) => e.action === 'removed')?.time ?? null,
+    last_warning: warning ?? null,
+    days_since_warning: warning ? days(warning) : null,
+    halted: existsSync(haltPath(env, config)),
+  };
 }
