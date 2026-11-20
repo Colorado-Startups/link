@@ -42,6 +42,7 @@ interface Context {
   keep: Keep;
   signals: Map<string, Signals>;
   endorsed: Set<string>;
+  invited: Set<string>;
   prior: Map<string, Connection>;
   now: Date;
 }
@@ -165,6 +166,7 @@ function connectionOf(p: Record<string, string>, x: Context): Connection {
     first, last, url, email, company: cell('company'), position: cell('position'), connected: isoDate(cell('connected on')),
     sent: s.sent, received: s.received, started: s.started, pitchFirst: s.pitchFirst,
     endorsed: x.endorsed.has(url) || x.endorsed.has(full),
+    invited: x.invited.has(url) || x.invited.has(full),
     keep: x.keep.urls.has(url) || (email !== '' && x.keep.emails.has(email)) || x.keep.names.has(full),
     mark: was?.mark,
   };
@@ -194,7 +196,12 @@ export async function archiveLoad(input: { path: string }, config: Config, env: 
   const inbox = waitingThreads(threads, (m) => keyOf(m) === owner);
   writeInbox(config, inbox);
 
-  const context = { rules, keep, signals, endorsed: endorsedIn(files), prior: priorConnections(config), now: new Date() };
+  const invited = new Set(
+    table('invitations.csv', 'from')
+      .filter((r) => (r.direction ?? '').toUpperCase() === 'OUTGOING')
+      .flatMap((r) => [normUrl(r.inviteeprofileurl ?? ''), (r.to ?? '').trim().toLowerCase()].filter(Boolean)),
+  );
+  const context = { rules, keep, signals, endorsed: endorsedIn(files), invited, prior: priorConnections(config), now: new Date() };
   const out = people.map((p) => connectionOf(p, context));
   writeJson(connectionsFile(config), out);
   dates.push(...out.map((c) => c.connected));
