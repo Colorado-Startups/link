@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 // The connection rater: a pure function from one connection's export data and the rules to a tier and a reason.
 // Eleven rules, the first match wins. No AI and no network: the rules are word lists and counts. The generic word
-// lists ship in rules/rater.default.json; LINK_RATER names an optional overlay file merged on top (lists joined,
+// lists ship in rules/rater.default.json; LINKEN_RATER names an optional overlay file merged on top (lists joined,
 // other values replaced). Keep lists are CSV files named in `keep_files`, matched on url, email or first and last name.
 import { readFileSync } from 'node:fs';
 import { parseCsv } from './csv.ts';
@@ -73,11 +73,11 @@ export function hasWord(text: string, words: string[]): boolean {
 
 const DEFAULT = new URL('../rules/rater.default.json', import.meta.url);
 
-/** The default rules with the LINK_RATER overlay, when `env` names one, merged on top. */
+/** The default rules with the LINKEN_RATER overlay, when `env` names one, merged on top. */
 export function loadRules(env: Record<string, string | undefined>): Rules {
   const rules = JSON.parse(readFileSync(DEFAULT, 'utf8')) as Rules;
-  if (!env.LINK_RATER) return rules;
-  const overlay = JSON.parse(readFileSync(env.LINK_RATER, 'utf8')) as Record<string, unknown>;
+  if (!env.LINKEN_RATER) return rules;
+  const overlay = JSON.parse(readFileSync(env.LINKEN_RATER, 'utf8')) as Record<string, unknown>;
   for (const [key, value] of Object.entries(overlay)) {
     const old = (rules as unknown as Record<string, unknown>)[key];
     (rules as unknown as Record<string, unknown>)[key] = Array.isArray(old) && Array.isArray(value) ? [...old, ...value] : value;

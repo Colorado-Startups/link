@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 // End to end over stdio, which the in-process tests cannot cover: the real server as a child process, spoken to in MCP
-// over its stdin and stdout as a host runs it, with tests/fixtures/fake-helper.mjs as LINK_HELPER_CMD. The specs the
+// over its stdin and stdout as a host runs it, with tests/fixtures/fake-helper.mjs as LINKEN_HELPER_CMD. The specs the
 // fixture logs then go through the real helper's own checks. Nothing here can post: no token, no network, no dialog.
 import { before, test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -30,8 +30,8 @@ before(async () => {
   const log = join(dir, 'specs.jsonl');
   const env = {
     HOME: dir,
-    LINK_HOME: join(dir, 'home'),
-    LINK_HELPER_CMD: JSON.stringify([process.execPath, path('./fixtures/fake-helper.mjs'), '--log', log]),
+    LINKEN_HOME: join(dir, 'home'),
+    LINKEN_HELPER_CMD: JSON.stringify([process.execPath, path('./fixtures/fake-helper.mjs'), '--log', log]),
   };
   const server = spawn(process.execPath, [path('../src/server.ts')], { env, stdio: ['pipe', 'pipe', 'inherit'] });
   const exited = new Promise<number | null>((resolve) => server.on('close', resolve));

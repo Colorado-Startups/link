@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 // connections_list, connections_mark, connections_next, connections_check, and the halt file. None of them talks to
-// LinkedIn: they read and write LINK_HOME/connections.json and removals.json (600). A person or an agent does the removing,
+// LinkedIn: they read and write LINKEN_HOME/connections.json and removals.json (600). A person or an agent does the removing,
 // one at a time, and reports back with connections_mark. connections_next paces it: a daily cap that ramps up, a sitting
 // cap, a random gap since the last removal, and a stop while the halt file exists.
 import { chmodSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
@@ -28,8 +28,8 @@ function events(config: Config): Event[] {
   }
 }
 
-/** The halt file: LINK_HALT_FILE, or `halt` in LINK_HOME when it is unset. */
-const haltPath = (env: Env, config: Config): string => env.LINK_HALT_FILE || join(config.home, 'halt');
+/** The halt file: LINKEN_HALT_FILE, or `halt` in LINKEN_HOME when it is unset. */
+const haltPath = (env: Env, config: Config): string => env.LINKEN_HALT_FILE || join(config.home, 'halt');
 
 /** Throws while the halt file exists: every LinkedIn action stops until a person deletes it. */
 export function refuseWhileHalted(env: Env, config: Config): void {
@@ -98,7 +98,7 @@ export function pace(all: Event[], now: Date) {
   };
 }
 
-/** LINK_GAP as [min, max] seconds; anything that is not "min-max" gives the default 15-45. */
+/** LINKEN_GAP as [min, max] seconds; anything that is not "min-max" gives the default 15-45. */
 export const gapRange = (raw: string | undefined): number[] => (/^\d+(\.\d+)?-\d+(\.\d+)?$/.test(raw ?? '') ? raw! : '15-45').split('-').map(Number);
 
 /** The next connection to remove, in REASON_ORDER, after the halt, daily, sitting and gap checks. */
@@ -107,7 +107,7 @@ export async function connectionsNext(config: Config, env: Env) {
   const p = pace(events(config), new Date());
   if (p.doneToday >= p.dailyCap) throw new LinkError(`Daily cap reached: ${p.doneToday} of ${p.dailyCap} removed today. Continue tomorrow.`);
   if (p.doneSitting >= p.sittingCap) throw new LinkError(`Sitting cap reached: ${p.doneSitting} of ${p.sittingCap}. A new sitting starts after 30 minutes idle.`);
-  const [lo, hi] = gapRange(env.LINK_GAP);
+  const [lo, hi] = gapRange(env.LINKEN_GAP);
   const gap = (lo + Math.random() * (hi - lo)) * 1000 - (p.lastRemoved ? Date.now() - Date.parse(p.lastRemoved) : Infinity);
   if (gap > 0) await new Promise((done) => setTimeout(done, gap));
   const rows = readConnections(config).filter((c) => c.tier === 'REMOVE' && !c.state && c.url);

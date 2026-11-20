@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Pre-publish gates (LINK_GATES): run before post_publish acts, live and in a dry run. Exit 0 passes and may warn,
+// Pre-publish gates (LINKEN_GATES): run before post_publish acts, live and in a dry run. Exit 0 passes and may warn,
 // exit 2 blocks before the transport is called, and anything else is "could not verify" and does not block. The gates
 // are the small scripts in tests/fixtures.
 import { test } from 'node:test';
@@ -30,7 +30,7 @@ test('pass: gates that exit 0 with nothing to say leave the result as it is', as
   assert.equal(calls.length, 2);
 });
 
-test('no gates: LINK_GATES unset, empty or [] runs nothing', async () => {
+test('no gates: LINKEN_GATES unset, empty or [] runs nothing', async () => {
   for (const gates of [undefined, '', '[]']) {
     const linkedin = fakeLinkedIn();
     const result = await call({ ...liveConfig(), gates }, linkedin.transport, 'post_publish', { text: 'x' });
@@ -77,13 +77,13 @@ test('gates run in a dry run too: a warning is kept, and a block stops the dry r
   assert.equal(warned.calls.length + blocked.calls.length, 0);
 });
 
-test('LINK_GATES that is not a JSON array of argument arrays is a clear tool error, before anything is sent', async () => {
+test('LINKEN_GATES that is not a JSON array of argument arrays is a clear tool error, before anything is sent', async () => {
   for (const gates of ['not json', '{"a":1}', '["python3 check.py"]', '[[]]', '[["python3", 1]]', '[[""]]']) {
     const { result, calls } = await publish(gates);
     assert.equal(result.isError, true, gates);
     assert.equal(
       result.content[0].text,
-      'LINK_GATES is not valid. Set it to a JSON array of argument arrays, for example [["python3","/abs/check.py","--hook"]].',
+      'LINKEN_GATES is not valid. Set it to a JSON array of argument arrays, for example [["python3","/abs/check.py","--hook"]].',
     );
     assert.equal(calls.length, 0);
   }

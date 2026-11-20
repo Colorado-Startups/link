@@ -30,7 +30,7 @@ function setup() {
   const opened: string[] = [];
   const desk = { copy: async (t: string) => void opened.push(`copy ${t}`), open: async (u: string) => void opened.push(`open ${u}`) };
   const halt = join(tempDir(), 'halt');
-  const env = { PATH: process.env.PATH, LINK_HALT_FILE: halt, LINK_OWNER_URL: url('Olive') };
+  const env = { PATH: process.env.PATH, LINKEN_HALT_FILE: halt, LINKEN_OWNER_URL: url('Olive') };
   const tool = async (name: string, args: Record<string, unknown> = {}, cfg = config) => {
     const r = await call(cfg, undefined, name, args, env, desk);
     return { isError: r.isError, text: r.content[0].text, json: r.isError ? undefined : JSON.parse(r.content[0].text) };

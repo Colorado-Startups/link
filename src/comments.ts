@@ -72,7 +72,7 @@ async function byHand(config: Config, desk: Desk, text: string, url: string, rea
 /**
  * Comments on a post, or replies under one comment, as the signed-in member, through the older
  * /v2/socialActions/{urn}/comments endpoint (comments-api, li-lms-2026-10, read 2026-11-13). This app's products list
- * no comments endpoint, so on a 403 it writes LINK_HOME/comments-api-refused and from then on, like that call, puts
+ * no comments endpoint, so on a 403 it writes LINKEN_HOME/comments-api-refused and from then on, like that call, puts
  * the text on the clipboard and opens the post for the member to paste. The text is plain: comments take no little
  * format. Live, a sent comment appends a ledger line; a dry run returns the requests and touches nothing.
  */

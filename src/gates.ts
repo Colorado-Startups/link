@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Pre-publish gates: the commands in LINK_GATES, run in order before a LinkedIn write tool acts, live or in a dry
+// Pre-publish gates: the commands in LINKEN_GATES, run in order before a LinkedIn write tool acts, live or in a dry
 // run. Each gets the tool call on stdin in the Claude Code PreToolUse hook shape. Exit 2 blocks. Exit 0 passes and
 // may warn. Anything else (another exit code, the 60 second limit, a command that will not start) is "could not
 // verify" and never blocks: a gate script decides when to block, and a broken one must not. A gate starts with the
@@ -42,7 +42,7 @@ function runGate(argv: string[], input: string, env: Record<string, string | und
   });
 }
 
-/** The gate commands in `raw` (LINK_GATES), or a LinkError that names the fix. */
+/** The gate commands in `raw` (LINKEN_GATES), or a LinkError that names the fix. */
 function parseGates(raw: string | undefined): string[][] {
   let gates: unknown = [];
   try {
@@ -53,7 +53,7 @@ function parseGates(raw: string | undefined): string[][] {
   // A program name, then its arguments. An argument may be empty; the program may not.
   const isArgv = (argv: unknown) => Array.isArray(argv) && argv.every((part) => typeof part === 'string') && !!argv[0];
   if (!Array.isArray(gates) || !gates.every(isArgv)) {
-    throw new LinkError(`LINK_GATES is not valid. Set it to a JSON array of argument arrays, for example ${EXAMPLE}.`);
+    throw new LinkError(`LINKEN_GATES is not valid. Set it to a JSON array of argument arrays, for example ${EXAMPLE}.`);
   }
   return gates as string[][];
 }

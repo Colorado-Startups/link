@@ -285,7 +285,7 @@ test('the ledger gets one JSON line per post, in a 700 folder and a 600 file', a
 });
 
 test('a post that went out is still reported when the ledger cannot be written', async () => {
-  // LINK_HOME sits under a plain file, so the folder cannot be made.
+  // LINKEN_HOME sits under a plain file, so the folder cannot be made.
   const blocker = join(tempDir(), 'file');
   writeFileSync(blocker, '');
   const config = { ...liveConfig(), home: join(blocker, 'home') };

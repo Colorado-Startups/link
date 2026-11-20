@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 // The inbox: threads from the data export's messages.csv whose last message is not the member's. archive_load writes
-// LINK_HOME/inbox.json; inbox_next reads it, newest first; inbox_mark records done, skip or spam in inbox-marks.json
+// LINKEN_HOME/inbox.json; inbox_next reads it, newest first; inbox_mark records done, skip or spam in inbox-marks.json
 // (600), so a re-load keeps them; reply_open puts a reply on the clipboard and opens the thread. LinkedIn has no
 // messaging API for this app and its User Agreement 8.2 bars bots that send messages, so the member presses Enter.
 import { readFileSync } from 'node:fs';
@@ -45,7 +45,7 @@ export function waitingThreads(threads: Map<string, Message[]>, mine: (m: Messag
   return out;
 }
 
-/** Saves the waiting threads as LINK_HOME/inbox.json, for the owner only. */
+/** Saves the waiting threads as LINKEN_HOME/inbox.json, for the owner only. */
 export const writeInbox = (config: Config, threads: Thread[]) => writeJson(inboxFile(config), threads);
 
 function readJson<T>(path: string, missing: () => T): T {

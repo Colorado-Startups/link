@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 // Every LinkedIn request Link makes, built here as a spec and handed to a transport. This file never calls fetch and
-// never sends, stores or returns the token: the trusted helper (trusted/link-linkedin.mjs) adds the token, asks the
+// never sends, stores or returns the token: the trusted helper (trusted/linken-linkedin.mjs) adds the token, asks the
 // member before each write, and sends. The helper gets the token from the process that starts it, in the supported
 // setup a key tool. Two functions here keep the token away from the server's side: refuseToken, which every tool
 // handler calls first and which only tests whether the server's environment holds a token, and childEnv, the minimal
@@ -12,15 +12,15 @@ import { lastLedgerLines } from './ledger.ts';
 import { API_VERSION, TOKEN_INVALID, openSession, whoAmI, where } from './session.ts';
 
 const TOKEN_MISSING =
-  "The LinkedIn helper had no usable token. Generate one in LinkedIn's Token Generator and store it (about 1 minute), and check that LINK_HELPER_CMD starts the helper through the key tool.";
+  "The LinkedIn helper had no usable token. Generate one in LinkedIn's Token Generator and store it (about 1 minute), and check that LINKEN_HELPER_CMD starts the helper through the key tool.";
 const HELPER_EXAMPLE =
-  'Set it to the command that starts the helper with the token, as a JSON array of strings, for example ["/bin/sh","-c","LINKEDIN_ACCESS_TOKEN=\\"$(/usr/bin/security find-generic-password -s link-linkedin -w)\\" exec /usr/local/bin/link-linkedin"].';
+  'Set it to the command that starts the helper with the token, as a JSON array of strings, for example ["/bin/sh","-c","LINKEDIN_ACCESS_TOKEN=\\"$(/usr/bin/security find-generic-password -s linken-linkedin -w)\\" exec /usr/local/bin/linken-linkedin"].';
 const TOKEN_IN_SERVER_ENV =
-  "LINKEDIN_ACCESS_TOKEN is set in the Link server's environment. The server must not hold the token. Remove it and let the helper command supply the token (for example a key tool that starts link-linkedin).";
+  "LINKEDIN_ACCESS_TOKEN is set in the Link server's environment. The server must not hold the token. Remove it and let the helper command supply the token (for example a key tool that starts linken-linkedin).";
 
-/** The command in LINK_HELPER_CMD, or a LinkError that names the fix. */
+/** The command in LINKEN_HELPER_CMD, or a LinkError that names the fix. */
 function helperCommand(raw: string | undefined): string[] {
-  if (!raw) throw new LinkError(`LINK_HELPER_CMD is not set. ${HELPER_EXAMPLE}`);
+  if (!raw) throw new LinkError(`LINKEN_HELPER_CMD is not set. ${HELPER_EXAMPLE}`);
   let command: unknown = null;
   try {
     command = JSON.parse(raw);
@@ -29,7 +29,7 @@ function helperCommand(raw: string | undefined): string[] {
   }
   // A program name, then its arguments. An argument may be empty; the program may not.
   const valid = Array.isArray(command) && command.every((part) => typeof part === 'string') && !!command[0];
-  if (!valid) throw new LinkError(`LINK_HELPER_CMD is not valid. ${HELPER_EXAMPLE}`);
+  if (!valid) throw new LinkError(`LINKEN_HELPER_CMD is not valid. ${HELPER_EXAMPLE}`);
   return command as string[];
 }
 
@@ -92,16 +92,16 @@ function helperExit(code: number | null, result: Partial<HelperResult> & { error
         `Could not reach LinkedIn (${where(spec)}). Check the network. If this was the post itself, check the profile before trying again.`,
       );
     case null:
-      throw new LinkError('Could not start the LinkedIn helper. Check that the command in LINK_HELPER_CMD exists.');
+      throw new LinkError('Could not start the LinkedIn helper. Check that the command in LINKEN_HELPER_CMD exists.');
     default:
       throw new LinkError(
-        `The LinkedIn helper command failed (exit ${code}). Check LINK_HELPER_CMD and that the token is stored.`,
+        `The LinkedIn helper command failed (exit ${code}). Check LINKEN_HELPER_CMD and that the token is stored.`,
       );
   }
 }
 
 /**
- * The default transport: runs the LINK_HELPER_CMD command without a shell, writes the spec to its stdin, and reads its
+ * The default transport: runs the LINKEN_HELPER_CMD command without a shell, writes the spec to its stdin, and reads its
  * one JSON result from stdout. The helper's stderr is dropped, so nothing it prints there can reach a result or a log.
  * `env` is the server's own environment: the transport checks it with refuseToken too, so it starts nothing when used
  * on its own with the token present, and the command starts with childEnv(env), never with `env` itself.

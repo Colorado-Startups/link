@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 // archive_load: reads a LinkedIn data export (the .zip or the unpacked folder) once, rates every connection and writes
-// LINK_HOME/connections.json and inbox.json (600). It reads local files only. A re-load keeps the owner's marks and states by URL.
+// LINKEN_HOME/connections.json and inbox.json (600). It reads local files only. A re-load keeps the owner's marks and states by URL.
 import { execFile } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync } from 'node:fs';
 import { join } from 'node:path';
@@ -49,7 +49,7 @@ interface Context {
 /** The person a message is from: its sender's profile URL, or the name in `from`. */
 const keyOf = (m: Message) => normUrl(m['sender profile url'] ?? '') || (m.from ?? '').toLowerCase();
 
-/** The folder that holds the export: `path` itself, or LINK_HOME/archive with the zip unpacked into it. */
+/** The folder that holds the export: `path` itself, or LINKEN_HOME/archive with the zip unpacked into it. */
 async function exportDir(path: string, config: Config, env: Env): Promise<string> {
   if (!existsSync(path)) throw new LinkError(`Nothing at ${path}. Give the path to the export .zip or its unpacked folder.`);
   if (!statSync(path).isFile()) return path;
@@ -63,9 +63,9 @@ async function exportDir(path: string, config: Config, env: Env): Promise<string
   return dir;
 }
 
-/** Who the owner is: LINK_OWNER_URL, or the most frequent sender in the messages. */
+/** Who the owner is: LINKEN_OWNER_URL, or the most frequent sender in the messages. */
 function ownerOf(messages: Message[], env: Env): string {
-  if (env.LINK_OWNER_URL) return normUrl(env.LINK_OWNER_URL);
+  if (env.LINKEN_OWNER_URL) return normUrl(env.LINKEN_OWNER_URL);
   const counts = new Map<string, number>();
   for (const m of messages) counts.set(keyOf(m), (counts.get(keyOf(m)) ?? 0) + 1);
   return [...counts].sort((a, b) => b[1] - a[1])[0]?.[0] ?? '';
@@ -186,7 +186,7 @@ export async function archiveLoad(input: { path: string }, config: Config, env: 
   if (!files.has('connections.csv')) throw new LinkError('The export has no Connections.csv. Request the full archive, or select Connections when you request it.');
   const people = table('connections.csv', 'first name');
 
-  // Messages: who the owner is (the most frequent sender, or LINK_OWNER_URL), then per person what was sent and received.
+  // Messages: who the owner is (the most frequent sender, or LINKEN_OWNER_URL), then per person what was sent and received.
   const messages = table('messages.csv', 'conversation id');
   const owner = ownerOf(messages, env);
   const threads = groupThreads(messages);

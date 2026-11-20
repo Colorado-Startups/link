@@ -21,7 +21,7 @@ Link rates your connections from your own LinkedIn data export (Settings, Data p
 | 10 | No message either way, connected over a year | REMOVE, `low` |
 | 11 | Anything else | REVIEW, `other` |
 
-Default word lists: `rules/rater.default.json`. `LINK_RATER` names a JSON overlay: lists are added, numbers replace. Mission words, `places` and `keep_files` (CSV with a `url`, `email`, or `first_name` and `last_name` column) belong in your overlay.
+Default word lists: `rules/rater.default.json`. `LINKEN_RATER` names a JSON overlay: lists are added, numbers replace. Mission words, `places` and `keep_files` (CSV with a `url`, `email`, or `first_name` and `last_name` column) belong in your overlay.
 
 | Days with removals since the last warning | Per day | Per sitting |
 |---|---|---|
@@ -29,12 +29,12 @@ Default word lists: `rules/rater.default.json`. `LINK_RATER` names a JSON overla
 | 4 to 7 | 50 | 25 |
 | 8 on | 80 | 40 |
 
-A sitting ends after 30 minutes idle. `connections_next` waits 15 to 45 seconds after the last removal. A `warning` mark writes `LINK_HALT_FILE`; while it exists, `connections_next`, `post_publish`, `comment_create` and `reply_open` refuse until you delete it.
+A sitting ends after 30 minutes idle. `connections_next` waits 15 to 45 seconds after the last removal. A `warning` mark writes `LINKEN_HALT_FILE`; while it exists, `connections_next`, `post_publish`, `comment_create` and `reply_open` refuse until you delete it.
 
 | Variable | Use |
 |---|---|
-| `LINK_HOME` | Folder for `connections.json`, `removals.json`, `archive/` (default `~/.link`) |
-| `LINK_RATER`, `LINK_HALT_FILE` | Overlay JSON path, halt file path |
-| `LINK_OWNER_URL`, `LINK_GAP` | Your profile URL if messages do not show you; wait range, default `15-45` |
+| `LINKEN_HOME` | Folder for `connections.json`, `removals.json`, `archive/` (default `~/.linken`) |
+| `LINKEN_RATER`, `LINKEN_HALT_FILE` | Overlay JSON path, halt file path |
+| `LINKEN_OWNER_URL`, `LINKEN_GAP` | Your profile URL if messages do not show you; wait range, default `15-45` |
 
 To remove a connection yourself: open the profile, More, Remove connection. The other person is not notified. Endorsements and recommendations between you are deleted.

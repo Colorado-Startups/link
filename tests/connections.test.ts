@@ -47,10 +47,10 @@ test('the rater: one case per rule, first match wins', () => {
   for (const [label, over, tier, reason] of cases) assert.deepEqual(rate(row(over), RULES, NOW), { tier, reason }, label);
 });
 
-test('a LINK_RATER overlay joins lists, replaces numbers and leaves the default alone', () => {
+test('a LINKEN_RATER overlay joins lists, replaces numbers and leaves the default alone', () => {
   const file = join(tempDir(), 'overlay.json');
   writeFileSync(file, JSON.stringify({ mission: ['geothermal'], places: ['denver'], low_days: 200 }));
-  const merged = loadRules({ LINK_RATER: file });
+  const merged = loadRules({ LINKEN_RATER: file });
   assert.deepEqual([merged.mission, merged.places, merged.low_days], [['geothermal'], ['denver'], 200]);
   assert.ok(merged.sales.includes('recruiter'));
   assert.deepEqual(loadRules({}).mission, []);
@@ -104,7 +104,7 @@ function setup() {
   const overlay = join(dir, 'overlay.json');
   writeFileSync(overlay, JSON.stringify({ mission: ['fusion'], places: ['denver'], keep_files: [keep] }));
   const halt = join(dir, 'halt.txt');
-  const env = { PATH: process.env.PATH, HOME: process.env.HOME, LINK_GAP: '0-0', LINK_RATER: overlay, LINK_HALT_FILE: halt };
+  const env = { PATH: process.env.PATH, HOME: process.env.HOME, LINKEN_GAP: '0-0', LINKEN_RATER: overlay, LINKEN_HALT_FILE: halt };
   const tool = async (name: string, args: Record<string, unknown> = {}) => {
     const r = await call(config, undefined, name, args, env);
     return { isError: r.isError, text: r.content[0].text, json: r.isError ? undefined : JSON.parse(r.content[0].text) };
@@ -127,7 +127,7 @@ test('archive_load rates a tiny export and writes connections.json at 600', asyn
   assert.equal((await tool('connections_next')).json.reason, 'pitch');
 });
 
-test('archive_load reads a zip with /usr/bin/unzip into LINK_HOME/archive', { skip: !existsSync('/usr/bin/zip') || !existsSync('/usr/bin/unzip') }, async () => {
+test('archive_load reads a zip with /usr/bin/unzip into LINKEN_HOME/archive', { skip: !existsSync('/usr/bin/zip') || !existsSync('/usr/bin/unzip') }, async () => {
   const { config, tool } = setup();
   const folder = exportFolder();
   const zip = join(tempDir(), 'export.zip');
@@ -213,9 +213,9 @@ test('a warning writes the halt file and stops connections_next and post_publish
   assert.match((await tool('post_publish', { text: 'Hello' })).text, /Halted/);
 });
 
-test('with LINK_HALT_FILE unset the halt file is LINK_HOME/halt, and a warning stops next and post_publish', async () => {
+test('with LINKEN_HALT_FILE unset the halt file is LINKEN_HOME/halt, and a warning stops next and post_publish', async () => {
   const { config, env, tool: withVar } = setup();
-  const unset = { ...env, LINK_HALT_FILE: undefined };
+  const unset = { ...env, LINKEN_HALT_FILE: undefined };
   const tool = async (name: string, args: Record<string, unknown> = {}) => (await call(config, undefined, name, args, unset)).content[0].text;
   await withVar('archive_load', { path: exportFolder() });
   await tool('connections_mark', { url: URL_OF('pat'), action: 'warning', note: 'slow down' });
@@ -238,7 +238,7 @@ test('a symlinked Connections.csv in the folder is ignored; a zip holding a syml
   assert.match(r.text, /symbolic link/);
 });
 
-test('a malformed LINK_GAP falls back to 15-45 instead of NaN', () => {
+test('a malformed LINKEN_GAP falls back to 15-45 instead of NaN', () => {
   assert.deepEqual([undefined, 'soon', '5', '1-', '2-4', '0-0'].map(gapRange), [[15, 45], [15, 45], [15, 45], [15, 45], [2, 4], [0, 0]]);
 });
 
@@ -247,6 +247,6 @@ test('keep-list headers match with spaces or underscores, in any case', async ()
   writeFileSync(keep, '"Email","First Name","Last Name"\n,Kay,Keep\n');
   const overlay = join(tempDir(), 'o.json');
   writeFileSync(overlay, JSON.stringify({ keep_files: [keep] }));
-  const rules = loadRules({ LINK_RATER: overlay });
+  const rules = loadRules({ LINKEN_RATER: overlay });
   assert.equal(loadKeep(rules).names.has('kay keep'), true);
 });
