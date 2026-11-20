@@ -12,6 +12,7 @@
   "scanning",
   "insights",
   "settings",
+  ["cleanup", "Clean-up"],
   ["credits", "Credits"],
   ["claude", "Claude"],
   ["claude-settings", "Claude settings"],
