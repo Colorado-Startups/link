@@ -32,7 +32,7 @@ If Claude cannot find `node`, put its absolute path in `command`. Sources: [conn
   "mcpServers": {
     "linken": {
       "command": "node",
-      "args": ["/absolute/path/to/link/src/server.ts"],
+      "args": ["/absolute/path/to/linken/src/server.ts"],
       "env": {
         "LINKEN_HELPER_CMD": "[\"/bin/sh\",\"-c\",\"LINKEDIN_ACCESS_TOKEN=\\\"$(/usr/bin/security find-generic-password -s linken-linkedin -w)\\\" exec /usr/local/bin/linken-linkedin\"]"
       }
@@ -47,6 +47,14 @@ If Claude cannot find `node`, put its absolute path in `command`. Sources: [conn
 | `LINKEN_HOME` | No | Data folder. Default `~/.linken` |
 | `LINKEN_DRY_RUN` | No | `1` calls no helper and writes no ledger line |
 | `LINKEN_GATES` | No | Commands that read each write as JSON on stdin and can block it |
-| `LINKEN_GATE_TOOL_PREFIX` | No | Tool-name prefix gates see. Default `mcp__linken__` |
 
-The token goes Keychain → helper and never enters the server. With `LINKEDIN_ACCESS_TOKEN` in the server's own environment, every tool call errors.
+The token goes Keychain → helper, never into the server. A `LINKEDIN_ACCESS_TOKEN` in the server's own environment makes every call error.
+
+## ✅ First live use
+
+| Check | When |
+| --- | --- |
+| 👤 The approval dialog shows the draft | First `LINKEN_DRY_RUN=1` run, then the first post |
+| 🖼️ Image and PDF upload | The first of each |
+| #️⃣ Hashtags and brackets show as written | The first post with them |
+| 🪪 You are the post's author | The first post |

@@ -18,7 +18,7 @@ flowchart LR
 
 ## 🎒 Try it in 2 minutes
 
-| Step | Do |
+| # | |
 | --- | --- |
 | 1 | `npm run sample` |
 | 2 | Claude: `archive_load` `~/.linken-sample` |
@@ -34,23 +34,24 @@ flowchart LR
 
 ## 🛡️ Safety
 
-| Guard | How |
+| Guard | |
 | --- | --- |
-| 👤 Approval dialog | Every post waits for your click |
-| 🛑 Halt file | Create `~/.linken/halt` and actions stop |
-| ⏱️ Pace caps | A daily cap and random gaps |
-| 🏠 Data stays on your Mac | Token in the Keychain, ledger in `~/.linken` |
-| 🚫 Removes nothing itself | You or your browser agent click Remove, one at a time |
+| 👤 Approval | Every post waits for your click |
+| 🛑 Halt | `~/.linken/halt` stops everything |
+| ⏱️ Pace | Daily caps, random gaps |
+| 🏠 Local | Token in the Keychain, data in `~/.linken` |
+| 🔎 Proof | Nobody is removed on old data: the live profile decides |
 
 ## Links
 
-| Page | Where |
+| Page | |
 | --- | --- |
 | 📊 Quality | <https://colorado-startups.github.io/linken/> |
 | ⚙️ Process | <https://colorado-startups.github.io/linken/process.html> |
 | 🔧 Setup | [docs/setup.md](docs/setup.md) |
-| 🔌 Connections guide | [docs/connections.md](docs/connections.md) |
+| 🧭 How it decides | [docs/decide.md](docs/decide.md) |
+| 🧹 Clean-up guide | [docs/connections.md](docs/connections.md) |
 | 🧩 Code | `src/` server · `rules/` word lists · `tests/` · `quality/` scores |
 | 📜 Legal | [Apache-2.0](LICENSE), [trademarks](TRADEMARKS.md) |
 
-Open source from Colorado Startups. Check its work before anything posts. Not affiliated with LinkedIn or Anthropic.
+Open source from Colorado Startups. Not affiliated with LinkedIn or Anthropic.

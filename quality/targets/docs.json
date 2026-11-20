@@ -22,7 +22,8 @@
           "doc": "skills/linken-cleanup/SKILL.md",
           "area": [
             "src/connections.ts",
-            "src/rater.ts"
+            "src/rater.ts",
+            "src/levels.ts"
           ]
         },
         {
@@ -31,7 +32,8 @@
             "src/archive.ts",
             "src/connections.ts",
             "src/rater.ts",
-            "rules/rater.default.json"
+            "rules/rater.default.json",
+            "src/levels.ts"
           ]
         },
         {
@@ -49,6 +51,14 @@
             ".github/workflows/ci.yml",
             ".github/workflows/pages.yml",
             "quality/config.json"
+          ]
+        },
+        {
+          "doc": "docs/decide.md",
+          "area": [
+            "src/levels.ts",
+            "rules/rater.default.json",
+            "rules/starter.startups.json"
           ]
         },
         {
