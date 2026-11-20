@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Test helper: one JSON-RPC request to a fresh Link server, answered in process through the SDK's request handler.
+// Test helper: one JSON-RPC request to a fresh Linken server, answered in process through the SDK's request handler.
 import assert from 'node:assert/strict';
 import { createMcpHandler } from '@modelcontextprotocol/server';
 import type { Config, Transport } from '../src/core.ts';

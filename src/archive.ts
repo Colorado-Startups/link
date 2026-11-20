@@ -56,7 +56,7 @@ async function exportDir(path: string, config: Config, env: Env): Promise<string
   const dir = join(config.home, 'archive');
   mkdirSync(config.home, { recursive: true, mode: 0o700 });
   const listing = await unzip(['-Z', path], env);
-  if (/^l/m.test(listing)) throw new LinkError('The zip holds a symbolic link. Link will not unpack it. Request a fresh export from LinkedIn.');
+  if (/^l/m.test(listing)) throw new LinkError('The zip holds a symbolic link. Linken will not unpack it. Request a fresh export from LinkedIn.');
   rmSync(dir, { recursive: true, force: true });
   mkdirSync(dir, { mode: 0o700 });
   await unzip(['-o', '-q', path, '-d', dir], env);

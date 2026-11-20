@@ -41,7 +41,7 @@ test('no gates: LINKEN_GATES unset, empty or [] runs nothing', async () => {
 
 test('warn: additionalContext comes back under gate_warnings, and the gate saw the PreToolUse hook shape', async () => {
   const { value, calls } = await publish([WARN]);
-  assert.deepEqual(value.gate_warnings, ['PreToolUse mcp__link__post_publish text=Gated post']);
+  assert.deepEqual(value.gate_warnings, ['PreToolUse mcp__linken__post_publish text=Gated post']);
   assert.equal(value.urn, POST_URN);
   assert.equal(calls.length, 2);
 
@@ -89,8 +89,8 @@ test('LINKEN_GATES that is not a JSON array of argument arrays is a clear tool e
   }
 });
 
-test('link_status is a read: no gate runs for it', async () => {
+test('linken_status is a read: no gate runs for it', async () => {
   const linkedin = fakeLinkedIn();
-  const result = await call({ ...liveConfig(), gates: JSON.stringify([BLOCK]) }, linkedin.transport, 'link_status');
+  const result = await call({ ...liveConfig(), gates: JSON.stringify([BLOCK]) }, linkedin.transport, 'linken_status');
   assert.notEqual(result.isError, true);
 });

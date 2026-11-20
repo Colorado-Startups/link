@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// The desk: the two things Link does on the Mac itself for a reply the member sends by hand. It puts text on the
+// The desk: the two things Linken does on the Mac itself for a reply the member sends by hand. It puts text on the
 // clipboard with /usr/bin/pbcopy and opens a www.linkedin.com page with /usr/bin/open. Nothing here sends anything:
 // the member reads the reply, presses Cmd+V and then Enter. Tests pass a fake desk.
 import { spawn } from 'node:child_process';
@@ -23,7 +23,7 @@ export function macDesk(env: Record<string, string | undefined>): Desk {
   return {
     copy: (text) => run('/usr/bin/pbcopy', [], text),
     open: (url) => {
-      if (!url.startsWith('https://www.linkedin.com/')) return Promise.reject(new LinkError('Link opens www.linkedin.com pages only.'));
+      if (!url.startsWith('https://www.linkedin.com/')) return Promise.reject(new LinkError('Linken opens www.linkedin.com pages only.'));
       return run('/usr/bin/open', [url]);
     },
   };

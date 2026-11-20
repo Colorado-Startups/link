@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// link_status against a fake LinkedIn: who the token is, whether it works, and the ledger tail.
+// linken_status against a fake LinkedIn: who the token is, whether it works, and the ledger tail.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { mkdirSync, writeFileSync } from 'node:fs';

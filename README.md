@@ -20,9 +20,9 @@ flowchart LR
 | 2 | Comment and reply | `comment_create`: a post link, or a "Copy link to comment" link to reply | Full; if LinkedIn refuses the endpoint, the text goes to your clipboard |
 | 3 | Messages | `archive_load`, `inbox_next`, `inbox_mark`, `reply_open` | No messaging API: Link drafts from your data export, you press Enter |
 | 4 | Connections | `connections_list`, `_mark`, `_next`, `_check` | No removal API: Link rates and paces, you remove |
-| | Status | `link_status` | Token, API version, last 5 ledger lines |
+| | Status | `linken_status` | Token, API version, last 5 ledger lines |
 
-Skills that drive each job: [link-post](skills/link-post/SKILL.md), [link-inbox](skills/link-inbox/SKILL.md), [link-cleanup](skills/link-cleanup/SKILL.md).
+Skills that drive each job: [linken-post](skills/linken-post/SKILL.md), [linken-inbox](skills/linken-inbox/SKILL.md), [linken-cleanup](skills/linken-cleanup/SKILL.md).
 
 ## Safety
 

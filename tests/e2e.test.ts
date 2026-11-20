@@ -73,11 +73,11 @@ before(async () => {
 
 test('over stdio the server answers initialize, then tools/list returns exactly the eleven tools', () => {
   assert.equal(initialize.result.protocolVersion, '2025-11-25');
-  assert.equal(initialize.result.serverInfo.name, 'link');
+  assert.equal(initialize.result.serverInfo.name, 'linken');
   assert.deepEqual(
     tools.result.tools.slice(0, 2).map(({ name, annotations }: Message) => ({ name, annotations })),
     [
-      { name: 'link_status', annotations: { readOnlyHint: true } },
+      { name: 'linken_status', annotations: { readOnlyHint: true } },
       { name: 'post_publish', annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: true } },
     ],
   );

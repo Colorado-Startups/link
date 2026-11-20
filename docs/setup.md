@@ -4,7 +4,7 @@ macOS only. You create your own LinkedIn app and are its developer under LinkedI
 
 ```mermaid
 flowchart LR
-  I[install + sudo ./install.sh] --> A[LinkedIn app + 2 products] --> T[token] --> K[linken-token → Keychain] --> H[Claude host config] --> S[link_status ✅]
+  I[install + sudo ./install.sh] --> A[LinkedIn app + 2 products] --> T[token] --> K[linken-token → Keychain] --> H[Claude host config] --> S[linken_status ✅]
 ```
 
 | Step | Do |
@@ -16,7 +16,7 @@ flowchart LR
 | 5. Make a token | Developer Portal, Token Generator: pick `openid profile w_member_social`, then generate. Tokens last 60 days, with no refresh; repeat steps 5 and 6 to renew |
 | 6. Store it | `linken-token`: paste it in the hidden dialog. It goes to your Keychain as `linken-linkedin` |
 | 7. Add to your Claude host | One row of the table below |
-| 8. Check | Ask Claude to call `link_status`. Rehearse with `LINKEN_DRY_RUN=1` before a live post |
+| 8. Check | Ask Claude to call `linken_status`. Rehearse with `LINKEN_DRY_RUN=1` before a live post |
 
 | Host | Do | Gets |
 | --- | --- | --- |
@@ -30,7 +30,7 @@ If Claude cannot find `node`, put its absolute path in `command`. Sources: [conn
 ```json
 {
   "mcpServers": {
-    "link": {
+    "linken": {
       "command": "node",
       "args": ["/absolute/path/to/link/src/server.ts"],
       "env": {
@@ -47,6 +47,6 @@ If Claude cannot find `node`, put its absolute path in `command`. Sources: [conn
 | `LINKEN_HOME` | No | Data folder. Default `~/.linken` |
 | `LINKEN_DRY_RUN` | No | `1` calls no helper and writes no ledger line |
 | `LINKEN_GATES` | No | Commands that read each write as JSON on stdin and can block it |
-| `LINKEN_GATE_TOOL_PREFIX` | No | Tool-name prefix gates see. Default `mcp__link__` |
+| `LINKEN_GATE_TOOL_PREFIX` | No | Tool-name prefix gates see. Default `mcp__linken__` |
 
 The token goes Keychain → helper and never enters the server. With `LINKEDIN_ACCESS_TOKEN` in the server's own environment, every tool call errors.

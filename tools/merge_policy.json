@@ -1,6 +1,6 @@
 {
   "_README": [
-    "Link's AI merge policy for tools/merge_policy.py, from Git Crafter templates/open/merge_policy.json.",
+    "Linken's AI merge policy for tools/merge_policy.py, from Git Crafter templates/open/merge_policy.json.",
     "An outside PR may merge with no maintainer only when it changes docs/**/*.md alone.",
     "src/, trusted/, install.sh, skills/ and .claude-plugin/ run or instruct agents, so they are maintainer_only."
   ],
@@ -96,7 +96,7 @@
         "src/linkedin.ts"
       ],
       [
-        "skills/link-post/SKILL.md"
+        "skills/linken-post/SKILL.md"
       ],
       [
         "docs/setup.md",
