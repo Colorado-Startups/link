@@ -8,6 +8,16 @@
  },
  "repo_url": "https://github.com/Colorado-Startups/linken/blob/main",
  "maps": [
+  {"id": "cleanup", "name": "Clean-up", "why": "Keep who matters, remove clear spam, prove every removal", "critical_path": ["load", "level", "check", "remove", "save", "verify"], "time_bar": null,
+   "steps": [
+    {"id": "load", "name": "Load", "icon": "repo", "tools": ["archive_load", "LinkedIn data export"], "rule": "Rate from the member's own export, on their Mac.", "rule_ref": "https://www.linkedin.com/help/linkedin/answer/50191", "metric": "cleanup.load_ms"},
+    {"id": "level", "name": "Level", "icon": "plan", "tools": ["src/levels.ts"], "rule": "Core is never queued; time without contact is not a reason.", "rule_ref": "https://github.com/Colorado-Startups/linken/blob/main/docs/connections.md", "metric": "cleanup.core_kept"},
+    {"id": "check", "name": "Check live", "icon": "review", "tools": ["connections_check", "the profile's top card"], "rule": "Nothing goes on the export alone: the page must still show it.", "rule_ref": "https://github.com/Colorado-Startups/linken/blob/main/docs/connections.md", "metric": "cleanup.proof_kept"},
+    {"id": "remove", "name": "Remove", "icon": "trash", "tools": ["Chrome", "connections_next"], "rule": "One at a time, paced, stop at any warning.", "rule_ref": "https://www.linkedin.com/help/linkedin/answer/a564226", "metric": "cleanup.check_tokens"},
+    {"id": "save", "name": "Save", "icon": "shield", "tools": ["connections_mark"], "rule": "Every removal and skip is saved; a removal is final.", "rule_ref": "https://github.com/Colorado-Startups/linken/blob/main/docs/connections.md", "metric": "cleanup.ledger_agrees"},
+    {"id": "verify", "name": "Verify", "icon": "measure", "tools": ["connections_summary", "the page's total"], "rule": "The total drops by exactly the removals.", "rule_ref": "https://github.com/Colorado-Startups/linken/blob/main/docs/connections.md", "metric": "cleanup.summary_tokens"}
+   ]
+  },
   {
    "use": "delivery"
   },

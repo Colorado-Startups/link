@@ -50,7 +50,7 @@ flowchart LR
 | ⚙️ Process | <https://colorado-startups.github.io/linken/process.html> |
 | 🔧 Setup | [docs/setup.md](docs/setup.md) |
 | 🔌 Connections guide | [docs/connections.md](docs/connections.md) |
-| 🧩 Code | `src/` server · `rules/` word lists · `tests/` |
+| 🧩 Code | `src/` server · `rules/` word lists · `tests/` · `quality/` scores |
 | 📜 Legal | [Apache-2.0](LICENSE), [trademarks](TRADEMARKS.md) |
 
 Open source from Colorado Startups. Check its work before anything posts. Not affiliated with LinkedIn or Anthropic.
