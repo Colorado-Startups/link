@@ -170,7 +170,8 @@ test('connections_check: REMOVE only when the page agrees with the export', asyn
   assert.match((await verdict({ degree: '2nd' })).reason, /1st/);
   assert.match((await verdict({ location: 'Denver, Colorado' })).reason, /rescue place/);
   assert.match((await verdict({ headline: 'Fusion researcher' })).reason, /mission/);
-  assert.equal((await verdict({ url: URL_OF('pat'), name: 'Pat Pitch', headline: 'Fusion researcher' })).verdict, 'REMOVE');
+  assert.equal((await verdict({ url: URL_OF('pat'), name: 'Pat Pitch', headline: 'Fusion researcher' })).verdict, 'SKIP');
+  assert.equal((await verdict({ url: URL_OF('pat'), name: 'Pat Pitch', headline: 'Growth consultant' })).verdict, 'REMOVE');
   assert.match((await verdict({ url: URL_OF('tom'), name: 'Tom Thread' })).reason, /^core: thread/);
   const nia = { url: URL_OF('nia'), name: 'Nia Nobody', headline: '', company: '' };
   assert.equal((await tool('connections_check', { ...page, ...nia, mutuals: 3 })).json.verdict, 'REMOVE');
