@@ -2,11 +2,11 @@
 // connections_list, connections_mark, connections_next, connections_check, and the halt file. None of them talks to
 // LinkedIn: they read and write LINKEN_HOME/connections.json and removals.json (600). A person or an agent does the removing,
 // one at a time, and reports back with connections_mark. connections_next paces it: a daily cap that ramps up, a sitting
-// cap, a random gap since the last removal, and a stop while the halt file exists.
-import { chmodSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+// cap, a random gap since the last removal or skip, and a stop while the halt file exists.
+import { chmodSync, existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { LinkError, type Config } from './core.ts';
-import { connectionsFile, readConnections, writeJson, type Connection } from './store.ts';
+import { connectionsFile, readConnections, readJson, writeJson, type Connection } from './store.ts';
 import { hasWord, loadRules, normUrl, REASON_ORDER } from './rater.ts';
 
 type Env = Record<string, string | undefined>;
@@ -20,13 +20,7 @@ interface Event {
 const removalsFile = (config: Config) => join(config.home, 'removals.json');
 const IDLE_MS = 30 * 60_000;
 
-function events(config: Config): Event[] {
-  try {
-    return JSON.parse(readFileSync(removalsFile(config), 'utf8')) as Event[];
-  } catch {
-    return [];
-  }
-}
+const events = (config: Config): Event[] => readJson<Event[]>(removalsFile(config), () => []);
 
 /** The halt file: LINKEN_HALT_FILE, or `halt` in LINKEN_HOME when it is unset. */
 const haltPath = (env: Env, config: Config): string => env.LINKEN_HALT_FILE || join(config.home, 'halt');
@@ -38,7 +32,11 @@ export function refuseWhileHalted(env: Env, config: Config): void {
 }
 
 const name = (c: Connection) => `${c.first} ${c.last}`.trim();
-const day = (iso: string) => iso.slice(0, 10);
+/** The LOCAL calendar date (YYYY-MM-DD) of a time, so a day ends at the owner's midnight, not at UTC midnight. */
+const day = (time: string | Date) => {
+  const d = new Date(time);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+};
 
 /** One page of the loaded connections that have no state, optionally only one tier or one reason. */
 export function connectionsList(input: { tier?: string; reason?: string; limit: number; offset: number }, config: Config) {
@@ -77,11 +75,15 @@ export function connectionsMark(input: { url: string; action: string; note?: str
   return { marked: input.action, url, halted: input.action === 'warning' };
 }
 
+/** A cap from the environment may only lower the built-in one; a higher, zero or malformed value is ignored. */
+const lowered = (raw: string | undefined, builtin: number): number => (/^[1-9]\d*$/.test(raw ?? '') ? Math.min(builtin, Number(raw)) : builtin);
+
 /** The pace: day 1 to 3 since the last warning 25 a day, 4 to 7 50, 8 on 80; a sitting is 25, or 40 from day 8. */
-export function pace(all: Event[], now: Date) {
+export function pace(all: Event[], now: Date, env: Env = {}) {
   const warned = all.findLastIndex((e) => e.action === 'warning');
-  const removed = all.slice(warned + 1).filter((e) => e.action === 'removed');
-  const today = day(now.toISOString());
+  const since = all.slice(warned + 1);
+  const removed = since.filter((e) => e.action === 'removed');
+  const today = day(now);
   const days = new Set(removed.map((e) => day(e.time)));
   days.add(today);
   const n = days.size;
@@ -91,11 +93,11 @@ export function pace(all: Event[], now: Date) {
     at = Date.parse(removed[i].time);
   }
   return {
-    dailyCap: n <= 3 ? 25 : n <= 7 ? 50 : 80,
-    sittingCap: n >= 8 ? 40 : 25,
+    dailyCap: lowered(env.LINKEN_DAILY_CAP, n <= 3 ? 25 : n <= 7 ? 50 : 80),
+    sittingCap: lowered(env.LINKEN_SITTING_CAP, n >= 8 ? 40 : 25),
     doneToday: removed.filter((e) => day(e.time) === today).length,
     doneSitting: sitting.length,
-    lastRemoved: removed.at(-1)?.time,
+    lastActed: since.findLast((e) => e.action === 'removed' || e.action === 'skipped')?.time,
   };
 }
 
@@ -105,11 +107,11 @@ export const gapRange = (raw: string | undefined): number[] => (/^\d+(\.\d+)?-\d
 /** The next connection to remove, in REASON_ORDER, after the halt, daily, sitting and gap checks. */
 export async function connectionsNext(config: Config, env: Env) {
   refuseWhileHalted(env, config);
-  const p = pace(events(config), new Date());
+  const p = pace(events(config), new Date(), env);
   if (p.doneToday >= p.dailyCap) throw new LinkError(`Daily cap reached: ${p.doneToday} of ${p.dailyCap} removed today. Continue tomorrow.`);
   if (p.doneSitting >= p.sittingCap) throw new LinkError(`Sitting cap reached: ${p.doneSitting} of ${p.sittingCap}. A new sitting starts after 30 minutes idle.`);
   const [lo, hi] = gapRange(env.LINKEN_GAP);
-  const gap = (lo + Math.random() * (hi - lo)) * 1000 - (p.lastRemoved ? Date.now() - Date.parse(p.lastRemoved) : Infinity);
+  const gap = (lo + Math.random() * (hi - lo)) * 1000 - (p.lastActed ? Date.now() - Date.parse(p.lastActed) : Infinity);
   if (gap > 0) await new Promise((done) => setTimeout(done, gap));
   const rows = readConnections(config).filter((c) => c.tier === 'REMOVE' && !c.state && c.url);
   for (const reason of REASON_ORDER) {

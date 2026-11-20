@@ -29,12 +29,13 @@ Default word lists: `rules/rater.default.json`. `LINKEN_RATER` names a JSON over
 | 4 to 7 | 50 | 25 |
 | 8 on | 80 | 40 |
 
-A sitting ends after 30 minutes idle. `connections_next` waits 15 to 45 seconds after the last removal. A `warning` mark writes `LINKEN_HALT_FILE`; while it exists, `connections_next`, `post_publish`, `comment_create` and `reply_open` refuse until you delete it.
+A sitting ends after 30 minutes idle. Days are your local calendar days. `connections_next` waits 15 to 45 seconds after the last removal or skip. A corrupt `removals.json` is an error naming the file, not an empty history. A `warning` mark writes `LINKEN_HALT_FILE`; while it exists, `connections_next`, `post_publish`, `comment_create` and `reply_open` refuse until you delete it.
 
 | Variable | Use |
 |---|---|
 | `LINKEN_HOME` | Folder for `connections.json`, `removals.json`, `archive/` (default `~/.linken`) |
 | `LINKEN_RATER`, `LINKEN_HALT_FILE` | Overlay JSON path, halt file path |
+| `LINKEN_DAILY_CAP`, `LINKEN_SITTING_CAP` | A whole number that lowers the per-day or per-sitting cap above. A higher, zero or malformed value is ignored, so these can slow Link down but never speed it up |
 | `LINKEN_OWNER_URL`, `LINKEN_GAP` | Your profile URL if messages do not show you; wait range, default `15-45` |
 
 To remove a connection yourself: open the profile, More, Remove connection. The other person is not notified. Endorsements and recommendations between you are deleted.
