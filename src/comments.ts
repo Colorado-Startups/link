@@ -25,7 +25,7 @@ function commentFromLink(link: string): string | undefined {
   const parent = comment ?? reply;
   if (parent === undefined) return undefined;
   const m = COMMENT.exec(parent.trim());
-  if (!m) throw new LinkError('The link names a comment Link cannot read. Pass the comment URN as parent instead.');
+  if (!m) throw new LinkError('The link names a comment Linken cannot read. Pass the comment URN as parent instead.');
   const post = POST.exec(link.slice(0, link.indexOf('?')))?.[0];
   if (post && post !== `urn:li:${m[1]}:${m[2]}`) throw new LinkError('The link names a comment on another post.');
   return parent;

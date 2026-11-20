@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// The Link MCP server over stdio. link_status reads; post_publish and comment_create write to LinkedIn as the
+// The Linken MCP server over stdio. linken_status reads; post_publish and comment_create write to LinkedIn as the
 // signed-in member. Every request goes through a transport, by default the command in LINKEN_HELPER_CMD, which starts the trusted
 // helper. The helper receives the token from the process that starts it. In the supported setup that is a key tool,
 // so the token goes from the Keychain to the key tool to the helper and never enters this server. Two rules hold in
@@ -64,7 +64,7 @@ async function run(env: Env, work: () => Promise<Record<string, unknown>>): Prom
     // An unexpected failure: its message could hold anything, so only its name is logged and none of it is returned.
     console.error('link_tool_failed', error instanceof Error ? error.name : 'unknown');
     return {
-      content: [{ type: 'text', text: 'Link hit an unexpected error. Try again. If it repeats, the server log names the error.' }],
+      content: [{ type: 'text', text: 'Linken hit an unexpected error. Try again. If it repeats, the server log names the error.' }],
       isError: true,
     };
   }
@@ -85,12 +85,12 @@ interface Deps {
   desk: Desk;
 }
 
-/** Registers link_status and post_publish. */
+/** Registers linken_status and post_publish. */
 function registerPostTools({ server, config, transport, env }: Deps): void {
   server.registerTool(
-    'link_status',
+    'linken_status',
     {
-      title: 'Link status',
+      title: 'Linken status',
       description:
         "Checks the LinkedIn connection with one read call (GET /v2/userinfo), sent through the trusted helper. Returns the member's name, the author URN (urn:li:person:{sub}), whether the token works, the pinned LinkedIn API version, whether dry-run is on, and the last 5 ledger lines. With LINKEN_DRY_RUN=1 it sends nothing and returns the request it would send. It publishes nothing and returns no token.",
       inputSchema: z.strictObject({}),
@@ -263,14 +263,14 @@ function registerInboxTools({ server, config, env, desk }: Deps): void {
 }
 
 /**
- * A server with every Link tool registered. `env` is the server's own environment, default `process.env`. `transport`
+ * A server with every Linken tool registered. `env` is the server's own environment, default `process.env`. `transport`
  * carries every LinkedIn request, by default the helper command in `config.helper`; tests pass a fake.
  */
 export function buildServer(config: Config, options: { transport?: Transport; env?: Env; desk?: Desk } = {}): McpServer {
   const env = options.env ?? process.env;
   const transport = options.transport ?? helperTransport(config.helper, env);
   const desk = options.desk ?? macDesk(env);
-  const server = new McpServer({ name: 'link', title: 'Link', version: VERSION });
+  const server = new McpServer({ name: 'linken', title: 'Linken', version: VERSION });
   const deps: Deps = { server, config, transport, env, desk };
   for (const register of [registerPostTools, registerCommentTool, registerArchiveTools, registerConnectionTools, registerInboxTools]) register(deps);
   return server;

@@ -12,7 +12,7 @@ test('an empty environment: no helper, dry-run off, ~/.linken, no gates and the 
     dryRun: false,
     home: join(homedir(), '.linken'),
     gates: undefined,
-    gatePrefix: 'mcp__link__',
+    gatePrefix: 'mcp__linken__',
   });
 });
 

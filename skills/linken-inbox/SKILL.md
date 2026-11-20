@@ -1,11 +1,11 @@
 ---
-name: link-inbox
-description: Work through LinkedIn messages waiting on the member with the Link MCP server, from their own data export, and open approved replies for them to send. Use when asked to answer LinkedIn messages, clear the LinkedIn inbox, or find who is waiting on a reply.
+name: linken-inbox
+description: Work through LinkedIn messages waiting on the member with the Linken MCP server, from their own data export, and open approved replies for them to send. Use when asked to answer LinkedIn messages, clear the LinkedIn inbox, or find who is waiting on a reply.
 ---
 
 # Answer LinkedIn messages
 
-LinkedIn offers no messaging API to self-serve apps, and its User Agreement 8.2 bars bots that send. So Link drafts; the member sends.
+LinkedIn offers no messaging API to self-serve apps, and its User Agreement 8.2 bars bots that send. So Linken drafts; the member sends.
 
 ```mermaid
 flowchart LR

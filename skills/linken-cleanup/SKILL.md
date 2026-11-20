@@ -1,11 +1,11 @@
 ---
-name: link-cleanup
-description: Rate and clean up LinkedIn connections with the Link MCP server, from the member's own data export, at a pace LinkedIn tolerates. Use when asked to clean up, prune or review LinkedIn connections or contacts.
+name: linken-cleanup
+description: Rate and clean up LinkedIn connections with the Linken MCP server, from the member's own data export, at a pace LinkedIn tolerates. Use when asked to clean up, prune or review LinkedIn connections or contacts.
 ---
 
 # Clean up LinkedIn connections
 
-LinkedIn has no API to remove a connection. Link rates and paces; the member removes each one in LinkedIn.
+LinkedIn has no API to remove a connection. Linken rates and paces; the member removes each one in LinkedIn.
 
 ```mermaid
 flowchart LR

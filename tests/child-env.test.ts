@@ -16,8 +16,8 @@ const SRC = fileURLToPath(new URL('../src/', import.meta.url));
 const fixture = (name: string) => fileURLToPath(new URL(`./fixtures/${name}`, import.meta.url));
 const EXCLUDED = ['LINKEDIN_ACCESS_TOKEN', 'NODE_OPTIONS', 'BASH_ENV', 'ENV'];
 const REFUSAL =
-  "LINKEDIN_ACCESS_TOKEN is set in the Link server's environment. The server must not hold the token. Remove it and let the helper command supply the token (for example a key tool that starts linken-linkedin).";
-const TOOLS = [['link_status', {}], ['post_publish', { text: 'Hello' }]] as const;
+  "LINKEDIN_ACCESS_TOKEN is set in the Linken server's environment. The server must not hold the token. Remove it and let the helper command supply the token (for example a key tool that starts linken-linkedin).";
+const TOOLS = [['linken_status', {}], ['post_publish', { text: 'Hello' }]] as const;
 
 test('every place in src/ that starts a process passes childEnv(env) as its environment', () => {
   const starts = /(?<![.\w])(spawn|spawnSync|exec|execSync|execFile|execFileSync|fork)\(/;

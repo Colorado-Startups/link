@@ -1,5 +1,5 @@
 {
- "comment": "Link's Quality, Speed and Consumption config, from Git Crafter v7.0.0 templates/quality/config.json. Dropped: projects (no board) and pages (no website). Tests moved to actions and tools to dependabot in v7, so neither id is listed. Credits comes from the compute-crafter pack and the six Claude tabs from the Claudius pack, each pinned at a full commit SHA and named as [id, Name] pairs because actions/pages reads this list before it checks the packs out. Keys: Git Crafter quality/CONFIG.md.",
+ "comment": "Linken's Quality, Speed and Consumption config, from Git Crafter v7.0.0 templates/quality/config.json. Dropped: projects (no board) and pages (no website). Tests moved to actions and tools to dependabot in v7, so neither id is listed. Credits comes from the compute-crafter pack and the six Claude tabs from the Claudius pack, each pinned at a full commit SHA and named as [id, Name] pairs because actions/pages reads this list before it checks the packs out. Keys: Git Crafter quality/CONFIG.md.",
  "tabs": [
   "code",
   "documentation",

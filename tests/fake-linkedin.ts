@@ -50,7 +50,7 @@ export function tempDir(): string {
 
 /** A live config with a fresh LINKEN_HOME that does not exist yet, no helper command and no gates. */
 export function liveConfig(): Config {
-  return { helper: undefined, dryRun: false, home: join(tempDir(), 'home'), gates: undefined, gatePrefix: 'mcp__link__' };
+  return { helper: undefined, dryRun: false, home: join(tempDir(), 'home'), gates: undefined, gatePrefix: 'mcp__linken__' };
 }
 
 /** Writes a small file with the given name into a fresh folder and returns its absolute path. */
