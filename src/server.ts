@@ -174,14 +174,14 @@ function registerArchiveTools({ server, config, env }: Deps): void {
   );
 }
 
-/** Registers connections_mark, connections_next, connections_check, connections_summary and connections_check_list. */
+/** Registers connections_mark, connections_next and connections_check. */
 function registerConnectionTools({ server, config, env }: Deps): void {
   server.registerTool(
     'connections_mark',
     {
       title: 'Mark a connection',
       description:
-        'Records the owner\'s decision for one connection: keep or remove overrides the rating; removed or skipped records what happened when a person removed it or passed it by in LinkedIn; warning records a LinkedIn warning and writes the halt file named by LINKEN_HALT_FILE, which stops connections_next, post_publish, comment_create and reply_open. It removes nothing on LinkedIn.',
+        'Records the owner\'s decision for one connection: keep or remove overrides the rating; removed or skipped records what happened when a person removed it or passed it by in LinkedIn, and a removal is final; warning records a LinkedIn warning and writes the halt file named by LINKEN_HALT_FILE, which stops connections_next, post_publish, comment_create and reply_open. It removes nothing on LinkedIn.',
       inputSchema: z.strictObject({
         url,
         action: z.enum(['keep', 'remove', 'removed', 'skipped', 'warning']).describe('keep or remove: override the rating. removed or skipped: the outcome. warning: LinkedIn showed a warning.'),
@@ -197,7 +197,7 @@ function registerConnectionTools({ server, config, env }: Deps): void {
     {
       title: 'Next connection to remove',
       description:
-        'Returns the next connection to check, clear spam first and then borderline (never core or low), with its level and the removals left today. It first checks the halt file, the daily cap (25, 50 or 80 as the days since the last warning go by) and the sitting cap (25, or 40 from day 8; a new sitting starts after 30 minutes idle), and waits a random 15 to 45 seconds since the last removal. It removes nothing and does not contact LinkedIn.',
+        'Returns the next connection to check, clear spam first, then borderline, then sellers when the rules opt in with also_remove (never core or low), with its level and the removals left today. It first checks the halt file, the daily cap (25, 50 or 80 as the days since the last warning go by) and the sitting cap (25, or 40 from day 8; a new sitting starts after 30 minutes idle), and waits a random 15 to 45 seconds since the last removal. It removes nothing and does not contact LinkedIn.',
       inputSchema: z.strictObject({}),
       annotations: { readOnlyHint: false, ...local },
     },
@@ -209,7 +209,7 @@ function registerConnectionTools({ server, config, env }: Deps): void {
     {
       title: 'Check a profile before removal',
       description:
-        'Compares what a profile page shows now with the stored connection and returns REMOVE or SKIP with its level (core, spam, borderline, low, nolink) and a reason. REMOVE needs live proof: spam still shown in the headline or company, a sales-pitch headline, or a bare profile (no headline, no company, fewer than bare_mutuals mutual connections). SKIP when the name differs, the degree is not 1st, a rescue place or mission words show, or the level is core or low. Pass company and mutuals; without them a bare profile is never removed. It reads local files only.',
+        'Compares what a profile page shows now with the stored connection and returns REMOVE or SKIP with its level (core, spam, borderline, seller, low, nolink) and a reason. REMOVE needs live proof: spam still shown in the headline or company, a sales-pitch headline, a seller whose headline still sells (only with also_remove), or a bare profile (no headline, no company, fewer than bare_mutuals mutual connections). SKIP when the name differs, the degree is not 1st, a rescue place or mission words show, or the level is core or low. Pass company and mutuals; without them a bare profile is never removed. It reads local files only.',
       inputSchema: z.strictObject({
         url,
         name: z.string().describe('The name shown on the profile page.'),
@@ -224,12 +224,16 @@ function registerConnectionTools({ server, config, env }: Deps): void {
     (input) => run(env, async () => connectionsCheck(input, config, env)),
   );
 
+}
+
+/** Registers connections_summary and connections_check_list, the read-only reports. */
+function registerConnectionReports({ server, config, env }: Deps): void {
   server.registerTool(
     'connections_summary',
     {
       title: 'Connections clean-up summary',
       description:
-        'Returns counts by tier, reason, state and level, the queue (spam and borderline rows with a URL and no state), today and this sitting against their caps, the last removal and warning, days since the warning, and whether the halt file exists. It reads local files only.',
+        'Returns counts by tier, reason, state and level, the queue (spam, borderline and opted-in seller rows with a URL and no state), today and this sitting against their caps, the last removal and warning, days since the warning, and whether the halt file exists. It reads local files only.',
       inputSchema: z.strictObject({}),
       annotations: { readOnlyHint: true, ...local },
     },
@@ -304,7 +308,7 @@ export function buildServer(config: Config, options: { transport?: Transport; en
   const desk = options.desk ?? macDesk(env);
   const server = new McpServer({ name: 'linken', title: 'Linken', version: VERSION });
   const deps: Deps = { server, config, transport, env, desk };
-  for (const register of [registerPostTools, registerCommentTool, registerArchiveTools, registerConnectionTools, registerInboxTools]) register(deps);
+  for (const register of [registerPostTools, registerCommentTool, registerArchiveTools, registerConnectionTools, registerConnectionReports, registerInboxTools]) register(deps);
   return server;
 }
 

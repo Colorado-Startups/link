@@ -1,15 +1,5 @@
 [
   {
-    "name": "good first issue",
-    "color": "7057ff",
-    "description": "Small, clear, and a good first contribution"
-  },
-  {
-    "name": "help wanted",
-    "color": "008672",
-    "description": "Open for any contributor"
-  },
-  {
     "name": "idea",
     "color": "fbca04",
     "description": "Started in Discussions"

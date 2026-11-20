@@ -10,6 +10,14 @@
       "Bash(gh pr checks *)",
       "Bash(gh run view *)"
     ],
-    "deny": ["Bash(git push origin main*)", "Bash(git push --force*)"]
+    "deny": [
+      "Bash(git push origin main*)",
+      "Bash(git push --force*)",
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Read(./secrets/**)",
+      "Read(./**/*.pem)",
+      "Read(./**/*.key)"
+    ]
   }
 }

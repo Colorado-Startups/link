@@ -23,6 +23,8 @@ export interface Rules {
   seller_companies: string[];
   seller_headlines: string[];
   bare_mutuals: number;
+  /** Opt-in levels to remove beyond spam and borderline; today only "seller". */
+  also_remove: string[];
 }
 
 /** What the export says about one connection. `connected` is YYYY-MM-DD or empty. */
