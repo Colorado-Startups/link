@@ -6,7 +6,7 @@ Your LinkedIn, run by Claude. Nothing posts until you click.
 
 | ✍️ Post | 📥 Inbox | 🧹 Clean up |
 | --- | --- | --- |
-| Posts, comments and replies you approve | Drafts replies from your own data export | Rates connections and paces the pruning |
+| Posts, comments and replies you approve | Drafts replies from your own data export | Keeps who matters, removes clear spam, paced |
 
 ```mermaid
 flowchart LR

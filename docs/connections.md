@@ -5,7 +5,50 @@ flowchart LR
   E[export zip] --> A[archive_load: rate] --> N[connections_next: pace] --> C[connections_check] -->|REMOVE| Y[you remove in LinkedIn] --> M[connections_mark]
 ```
 
-Link rates your connections from your own LinkedIn data export (Settings, Data privacy, Get a copy of your data). It reads local files only, never talks to LinkedIn, and removes nothing. Tools: `archive_load`, `connections_list`, `connections_mark`, `connections_next`, `connections_check`, `connections_check_list`, `connections_summary`.
+## How Linken decides
+
+The goal: keep every contact who matters, and remove only clear spam and bare profiles. Checks run top to bottom; the first that matches decides. Nothing is removed on the export alone: the profile page, as it is today, must agree.
+
+```mermaid
+flowchart TD
+  C[Each connection] --> K{Core signal?<br/>you wrote, endorsed, keep list,<br/>new, place or keep word}
+  K -->|yes| CORE[🟢 Core: never removed]
+  K -->|no| S{Clear spam?<br/>spam title, freelance site,<br/>pitch you never answered}
+  S -->|no| B{Empty in the export,<br/>or seller at an agency?}
+  B -->|no| LOW[⚪ Low: kept]
+  S -->|yes| SL{Page still shows spam?}
+  B -->|yes| BL{Page shows a pitch headline,<br/>or a bare profile with<br/>fewer than 10 mutuals?}
+  SL -->|yes| R[🗑️ REMOVE, paced]
+  BL -->|yes| R
+  SL -->|no| SK[SKIP]
+  BL -->|no| SK
+```
+
+| Level | Who | What happens |
+|---|---|---|
+| 🟢 Core | You started a thread or wrote twice, endorsements or recommendations either way, keep lists, connected in the last 90 days, a `places` match, `mission` words | Never removed |
+| 🔴 Spam | Your remove mark, a pitch you never answered, `spam_titles`, `spam_companies` | Checked first. Removed only if the page still shows it (marks and pitches need no page proof) |
+| 🟠 Borderline | Empty title and company in the export, or a `sales` title at a `seller_companies` company | Removed only on a `seller_headlines` headline, or a bare page: no headline, no company and fewer than `bare_mutuals` mutual connections |
+| ⚪ Low | Everything else, including ordinary sales jobs and people you have not talked to in years | Kept |
+| ⛔ No link | Export rows with no profile URL | Never matched, never removed |
+
+| On the page | Always wins |
+|---|---|
+| A `places` word in the location or company | SKIP, even over your own remove mark |
+| A `mission` word in the headline or company | SKIP, except for a pitch or your mark |
+| Name differs, or not 1st degree | SKIP |
+
+Keep words are yours. A startup-community overlay could start with:
+
+```json
+{ "mission": ["founder", "cofounder", "ceo", "chief", "partner", "president", "investor", "venture", "angel", "startup",
+  "accelerator", "incubator", "community", "ecosystem", "entrepreneur", "ai", "government", "policy"],
+  "places": ["your city", "your state"] }
+```
+
+## Step 1: the rater
+
+Linken rates your connections from your own LinkedIn data export (Settings, Data privacy, Get a copy of your data). It reads local files only, never talks to LinkedIn, and removes nothing. Tools: `archive_load`, `connections_list`, `connections_mark`, `connections_next`, `connections_check`, `connections_check_list`, `connections_summary`.
 
 | # | Rule, first match wins | Tier, reason |
 |---|---|---|
@@ -20,6 +63,8 @@ Link rates your connections from your own LinkedIn data export (Settings, Data p
 | 9 | No position and no company | REMOVE, `empty` |
 | 10 | No message either way, connected over a year | REMOVE, `low` |
 | 11 | Anything else | REVIEW, `other` |
+
+The tiers feed the levels above. A REMOVE tier alone removes nobody: `low` and ordinary `sales` rows are kept, and the rest need live proof.
 
 Default word lists: `rules/rater.default.json`. `LINKEN_RATER` names a JSON overlay: lists are added, numbers replace. Mission words, `places` and `keep_files` (CSV with a `url`, `email`, or `first_name` and `last_name` column) belong in your overlay.
 
@@ -48,7 +93,7 @@ flowchart TD
 | --- | --- |
 | 1. Open | My Network, Connections |
 | 2. Filter | Locations: one place you do not protect (never a place in your `places` list) |
-| 3. Read | One screen of rows: profile link, name, headline, and the location if the row shows it |
+| 3. Read | One screen of rows: profile link, name, headline, and the location if the row shows it. Rows show no company or mutuals, so a borderline row is never removed here; use the profile lane for those |
 | 4. Check | `connections_check_list` with up to 40 rows; it returns REMOVE or SKIP with a reason per row and records nothing |
 | 5. Remove | For each REMOVE: wait as `connections_next` says, More, Remove connection, confirm, then `connections_mark` `removed` |
 | 6. Stop | On any CAPTCHA, check, warning, logout or failed removal: `connections_mark` `warning` and stop |
