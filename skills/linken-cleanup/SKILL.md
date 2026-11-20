@@ -5,60 +5,41 @@ description: Rate and clean up LinkedIn connections with the Linken MCP server, 
 
 # Clean up LinkedIn connections
 
-LinkedIn has no API to remove a connection. Linken rates and paces; the member removes each one in LinkedIn. The aim is to keep every contact who matters: clear spam goes first, borderline only on live proof, and core and low are never removed. The decision model, drawn: `docs/connections.md`, "How Linken decides".
+LinkedIn has no API to remove a connection. Linken rates and paces; the member, or their browser agent, clicks Remove. Goal: keep everyone who matters. Who goes: `docs/decide.md`.
 
 ```mermaid
 flowchart LR
-  L[archive_load] --> R[connections_list: review tiers] --> N[connections_next] --> C[connections_check: profile matches?]
-  C -->|REMOVE| H[member removes in LinkedIn] --> M[connections_mark removed]
-  C -->|SKIP| S[connections_mark skipped]
+  L["archive_load"] --> S["connections_summary"] --> N["connections_next"] --> P["Open profile"] --> C{"connections_check"}
+  C -->|REMOVE| X["Remove"] --> M["connections_mark removed"]
+  C -->|SKIP| K["connections_mark skipped"]
+  M --> V["Total dropped by 1?"]
 ```
 
 | Step | Do |
-| --- | --- |
-| 0. Try it | `npm run sample` writes a fictional export to `~/.linken-sample`; `archive_load` it, then `connections_summary` |
-| 1. Load | `archive_load` with the full export (Connections.csv is not in the fast one) |
-| 2. Review | `connections_list` by tier and reason; `connections_mark` `keep` or `remove` to override |
-| 3. Next | `connections_next` returns one, spam first, then borderline, after its caps and wait |
-| 4. Check | Open the profile; pass exactly what the top card shows to `connections_check`: name, degree, headline, location, current company, and mutual connections (0 when none show). Never guess a field |
-| 5. Remove | On REMOVE the member opens More, Remove connection, then you `connections_mark` `removed` |
+|---|---|
+| 0 · Try | `npm run sample`, then `archive_load` `~/.linken-sample` |
+| 1 · Load | `archive_load` the full export (Connections.csv is not in the fast one) |
+| 2 · Show | Draw `connections_summary`: levels as bars, queue, today against its cap |
+| 3 · Sample | Show the member the first names `connections_next` would bring, with title and reason. Start on their OK |
+| 4 · Next | `connections_next`: spam first, then borderline, then sellers if opted in |
+| 5 · Read | Open the profile. Pass exactly what the top card shows: name, degree, headline, location, current company, mutuals (0 if none) |
+| 6 · Check | `connections_check`. Remove only on REMOVE |
+| 7 · Save | `connections_mark` `removed` or `skipped`, every time, with the reason |
+| 8 · Verify | The header's total drops by exactly the removals |
 
-## The Connections-list lane
-
-When you filter the list by place instead of opening each profile, use `connections_check_list` for the checks. Pacing is unchanged.
-
-```mermaid
-flowchart TD
-  O[My Network, Connections] --> F[Filter Locations to one place you do not protect]
-  F --> R[Read one screen: profile link, name, headline]
-  R --> K[connections_check_list]
-  K -->|SKIP| T[Leave the row]
-  K -->|REMOVE| W[Wait per connections_next] --> X[More, Remove connection, confirm] --> M[connections_mark removed]
-  M -->|next REMOVE row, then next screen| W
-  X -->|CAPTCHA, check, warning, logout or failed removal| H[Stop: connections_mark warning]
-```
-
-| Step | Do |
-| --- | --- |
-| 1. Open | My Network, Connections |
-| 2. Filter | Locations: one place you do not protect (never a place in your `places` list) |
-| 3. Read | One screen of rows: profile link, name, headline, and the location if the row shows it |
-| 4. Check | `connections_check_list` with up to 40 rows; it returns REMOVE or SKIP with a reason per row and records nothing |
-| 5. Remove | For each REMOVE: wait as `connections_next` says, More, Remove connection, confirm, then `connections_mark` `removed` |
-| 6. Stop | On any CAPTCHA, check, warning, logout or failed removal: `connections_mark` `warning` and stop |
-| 7. Verify | Compare the total connection count in the page header before and after. The filtered count lags, so never use it |
-
-`connections_summary` shows the queue, today and this sitting against their caps, and the last warning.
-
-| Cap | Value |
-| --- | --- |
-| Per day | 25, then 50 from day 4, 80 from day 8 since the last warning |
-| Per sitting | 25, or 40 from day 8; a sitting ends after 30 minutes idle |
-| Between removals | 15 to 45 seconds, random |
+## Rules
 
 | Rule | Why |
-| --- | --- |
-| Any LinkedIn warning: `connections_mark` `warning` at once | It writes the halt file, which stops removals, posts, comments and replies |
-| Never remove without a REMOVE from `connections_check` | The rating can be stale |
-| When the page shows someone who clearly matters, skip, even on REMOVE | Keeping a contact costs nothing; a wrong removal costs the relationship |
-| Removal is silent to the other person, but deletes endorsements and recommendations between you | Say so before the first one |
+|---|---|
+| 🛑 Any CAPTCHA, check, warning, sign-out or failed removal: `connections_mark warning`, stop | Writes the halt file; 7 days off, then half pace |
+| 🤔 Page shows someone who clearly matters: skip, even on REMOVE | A wrong removal costs the relationship |
+| 🧾 Never guess a top-card field | A guess can turn a keep into a remove |
+| 🔁 Removed is final | `connections_mark` refuses a later mark |
+| 🪙 Keep reads small | `find` and accessibility reads over screenshots |
+| 📣 Before the first removal, say it is silent but deletes endorsements between you | No surprises |
+
+| Cap | Value |
+|---|---|
+| Per day | 25, then 50 from day 4, 80 from day 8 since a warning |
+| Per sitting | 25, or 40 from day 8 |
+| Gap | 15 to 45 s, random |
