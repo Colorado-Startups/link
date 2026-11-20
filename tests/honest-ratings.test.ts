@@ -46,6 +46,6 @@ test('a keep place beats a remove mark in connections_check', async () => {
   await tool('archive_load', { path: dir });
   await tool('connections_mark', { url: URL_OF('dee'), action: 'remove' });
   const page = { url: URL_OF('dee'), name: 'Dee Marked', degree: '1st', location: 'Austin, Texas', headline: 'Analyst' };
-  assert.deepEqual((await tool('connections_check', page)).json, { verdict: 'REMOVE', reason: 'override' });
+  assert.deepEqual((await tool('connections_check', page)).json, { verdict: 'REMOVE', level: 'spam', reason: 'override' });
   assert.match((await tool('connections_check', { ...page, location: 'Denver, Colorado' })).json.reason, /rescue place/);
 });

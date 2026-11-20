@@ -14,6 +14,23 @@
     "mlm", "network marketing", "independent distributor", "independent consultant", "direct sales", "affiliate",
     "insurance agent", "financial advisor", "real estate agent", "growth hacker", "outreach"
   ],
+  "spam_titles": [
+    "lead generation", "lead gen", "appointment setting", "appointment setter", "cold email", "cold calling", "mlm",
+    "network marketing", "independent distributor", "forex", "binary options", "crypto trader", "dropshipping",
+    "virtual assistant", "link building", "guest posting", "growth hacker", "white label"
+  ],
+  "spam_companies": ["upwork", "fiverr", "freelancer.com"],
+  "seller_companies": [
+    "outsourcing", "offshore", "nearshore", "staff augmentation", "software development", "web development",
+    "app development", "it solutions", "it services", "digital marketing", "marketing agency", "digital agency",
+    "pvt ltd", "pvt. ltd", "private limited"
+  ],
+  "seller_headlines": [
+    "i help", "we help", "book a call", "book a demo", "dm me", "lead generation", "appointments", "outsourcing",
+    "offshore", "nearshore", "white label", "software development", "web development", "app development", "seo",
+    "digital marketing", "growth hacking"
+  ],
+  "bare_mutuals": 10,
   "mission": [],
   "places": [],
   "keep_files": []
