@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 // The connection rater: a pure function from one connection's export data and the rules to a tier and a reason.
-// Eleven rules, the first match wins. No AI and no network: the rules are word lists and counts. The generic word
+// Eleven rules (and a no_url guard before them), the first match wins. No AI and no network: the rules are word lists and counts. The generic word
 // lists ship in rules/rater.default.json; LINKEN_RATER names an optional overlay file merged on top (lists joined,
 // other values replaced). Keep lists are CSV files named in `keep_files`, matched on url, email or first and last name.
 import { readFileSync } from 'node:fs';
@@ -117,6 +117,7 @@ const when =
 
 /** The rules in order, the first match wins; REVIEW 'other' is the answer when none matches. */
 const RULES: Rule[] = [
+  when((row) => !row.url, 'REVIEW', 'no_url'), // 0: nothing to serve or match on
   when((row) => row.mark === 'keep', 'KEEP', 'override'), // 1
   when((row) => row.mark === 'remove', 'REMOVE', 'override'), // 1
   when((row) => row.started || row.sent >= 2, 'PROTECTED', 'thread'), // 2

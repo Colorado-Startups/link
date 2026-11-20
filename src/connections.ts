@@ -55,6 +55,7 @@ export function connectionsList(input: { tier?: string; reason?: string; limit: 
 export function connectionsMark(input: { url: string; action: string; note?: string }, config: Config, env: Env) {
   const time = new Date().toISOString();
   const url = normUrl(input.url);
+  if (!url && input.action !== 'warning') throw new LinkError('connections_mark needs a profile URL.');
   const all = events(config);
   all.push({ time, url, action: input.action, ...(input.note ? { note: input.note } : {}) });
   if (input.action === 'warning') {
@@ -148,7 +149,6 @@ export function connectionsCheck(input: Page, config: Config, env: Env) {
   if (c.tier !== 'REMOVE' || c.state) return skip(`not in the REMOVE tier (${c.state ?? c.tier})`);
   const mismatch = notThisProfile(c, input);
   if (mismatch) return skip(mismatch);
-  if (c.reason === 'override') return { verdict: 'REMOVE', reason: c.reason };
   const rescue = rescuedBy(c, input, env);
   if (rescue) return skip(rescue);
   return { verdict: 'REMOVE', reason: c.reason };

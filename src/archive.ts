@@ -146,7 +146,7 @@ function endorsedIn(files: Map<string, string>): Set<string> {
 function priorConnections(config: Config): Map<string, Connection> {
   const prior = new Map<string, Connection>();
   try {
-    for (const c of readConnections(config)) prior.set(c.url, c);
+    for (const c of readConnections(config)) if (c.url) prior.set(c.url, c);
   } catch {
     // a first load
   }
