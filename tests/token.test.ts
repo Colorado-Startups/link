@@ -20,7 +20,7 @@ function run(answer: string | null) {
   writeFileSync(sec, `#!/bin/sh\necho "$@" > ${dir}/argv\ncat > ${dir}/stdin\n`);
   chmodSync(osa, 0o755);
   chmodSync(sec, 0o755);
-  const r = spawnSync('/bin/sh', [SCRIPT], { env: { PATH: '/usr/bin:/bin', USER: 'member', LINK_OSASCRIPT: osa, LINK_SECURITY: sec }, encoding: 'utf8' });
+  const r = spawnSync('/bin/sh', [SCRIPT], { env: { PATH: '/usr/bin:/bin', USER: 'member', LINKEN_OSASCRIPT: osa, LINKEN_SECURITY: sec }, encoding: 'utf8' });
   const read = (f: string) => (existsSync(join(dir, f)) ? readFileSync(join(dir, f), 'utf8') : null);
   return { status: r.status, argv: read('argv'), stdin: read('stdin') };
 }

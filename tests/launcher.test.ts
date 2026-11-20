@@ -92,7 +92,7 @@ test('the launcher hands Node the token through a pipe: HOME and the token only,
   const input = '{"method":"GET","url":"https://api.linkedin.com/v2/userinfo","note":"a \\" quote, é and 🚀"}\nsecond line\n';
   const result = start(
     launcher,
-    { HOME: '/home/fake', [VAR]: FAKE_TOKEN, NODE_OPTIONS: '--no-warnings', PATH: '/nonexistent', LINK_TEST_JUNK: 'junk' },
+    { HOME: '/home/fake', [VAR]: FAKE_TOKEN, NODE_OPTIONS: '--no-warnings', PATH: '/nonexistent', LINKEN_TEST_JUNK: 'junk' },
     input,
   );
   assert.equal(result.stderr, '');
