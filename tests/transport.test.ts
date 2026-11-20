@@ -94,7 +94,7 @@ test("with the token in the server's own environment, the transport refuses and 
   const marker = join(tempDir(), 'helper-ran');
   const leaveMarker = `require('node:fs').writeFileSync(${JSON.stringify(marker)},'ran');process.stdout.write('{"status":200,"headers":{},"body":null}')`;
   const refusal =
-    "LINKEDIN_ACCESS_TOKEN is set in the Link server's environment. The server must not hold the token. Remove it and let the helper command supply the token (for example a key tool that starts linken-linkedin).";
+    "LINKEDIN_ACCESS_TOKEN is set in the Linken server's environment. The server must not hold the token. Remove it and let the helper command supply the token (for example a key tool that starts linken-linkedin).";
   for (const raw of [helper(leaveMarker), undefined, 'not json']) {
     assert.equal(await failure(raw, { LINKEDIN_ACCESS_TOKEN: 'fake-token-for-tests', PATH: process.env.PATH }), refusal);
   }

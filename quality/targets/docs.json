@@ -4,7 +4,7 @@
     "params": {
       "areas": [
         {
-          "doc": "skills/link-post/SKILL.md",
+          "doc": "skills/linken-post/SKILL.md",
           "area": [
             "src/linkedin.ts",
             "src/server.ts",
@@ -12,14 +12,14 @@
           ]
         },
         {
-          "doc": "skills/link-inbox/SKILL.md",
+          "doc": "skills/linken-inbox/SKILL.md",
           "area": [
             "src/inbox.ts",
             "src/desk.ts"
           ]
         },
         {
-          "doc": "skills/link-cleanup/SKILL.md",
+          "doc": "skills/linken-cleanup/SKILL.md",
           "area": [
             "src/connections.ts",
             "src/rater.ts"

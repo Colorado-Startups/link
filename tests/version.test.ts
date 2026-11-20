@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// The version contract: Link pins one LinkedIn API version, and this test goes red 30 days before that version's
+// The version contract: Linken pins one LinkedIn API version, and this test goes red 30 days before that version's
 // sunset, while there is still time to move. The fix is a newer version and sunset in quality/api-version.json.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';

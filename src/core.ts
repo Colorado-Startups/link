@@ -28,7 +28,7 @@ export interface Config {
   home: string;
   /** LINKEN_GATES: the pre-publish gate commands, as a JSON array of argument arrays (src/gates.ts). */
   gates: string | undefined;
-  /** LINKEN_GATE_TOOL_PREFIX, default mcp__link__: what a gate sees before the tool's name. */
+  /** LINKEN_GATE_TOOL_PREFIX, default mcp__linken__: what a gate sees before the tool's name. */
   gatePrefix: string;
 }
 
@@ -39,7 +39,7 @@ export function configFrom(env: Record<string, string | undefined>): Config {
     dryRun: env.LINKEN_DRY_RUN === '1',
     home: env.LINKEN_HOME || join(homedir(), '.linken'),
     gates: env.LINKEN_GATES || undefined,
-    gatePrefix: env.LINKEN_GATE_TOOL_PREFIX ?? 'mcp__link__',
+    gatePrefix: env.LINKEN_GATE_TOOL_PREFIX ?? 'mcp__linken__',
   };
 }
 

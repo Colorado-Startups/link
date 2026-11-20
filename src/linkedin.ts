@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Every LinkedIn request Link makes, built here as a spec and handed to a transport. This file never calls fetch and
+// Every LinkedIn request Linken makes, built here as a spec and handed to a transport. This file never calls fetch and
 // never sends, stores or returns the token: the trusted helper (trusted/linken-linkedin.mjs) adds the token, asks the
 // member before each write, and sends. The helper gets the token from the process that starts it, in the supported
 // setup a key tool. Two functions here keep the token away from the server's side: refuseToken, which every tool
@@ -16,7 +16,7 @@ const TOKEN_MISSING =
 const HELPER_EXAMPLE =
   'Set it to the command that starts the helper with the token, as a JSON array of strings, for example ["/bin/sh","-c","LINKEDIN_ACCESS_TOKEN=\\"$(/usr/bin/security find-generic-password -s linken-linkedin -w)\\" exec /usr/local/bin/linken-linkedin"].';
 const TOKEN_IN_SERVER_ENV =
-  "LINKEDIN_ACCESS_TOKEN is set in the Link server's environment. The server must not hold the token. Remove it and let the helper command supply the token (for example a key tool that starts linken-linkedin).";
+  "LINKEDIN_ACCESS_TOKEN is set in the Linken server's environment. The server must not hold the token. Remove it and let the helper command supply the token (for example a key tool that starts linken-linkedin).";
 
 /** The command in LINKEN_HELPER_CMD, or a LinkError that names the fix. */
 function helperCommand(raw: string | undefined): string[] {
@@ -119,7 +119,7 @@ export function helperTransport(
 }
 
 /**
- * What `link_status` returns: who the token signs in as, whether the token works (null in a dry run, which does not
+ * What `linken_status` returns: who the token signs in as, whether the token works (null in a dry run, which does not
  * check), the pinned API version, whether dry-run is on, and the last 5 ledger lines. A missing or rejected token is
  * an answer, not an error. Any other failure is thrown.
  */

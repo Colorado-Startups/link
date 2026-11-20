@@ -1,14 +1,15 @@
 {
-  "name": "link",
+  "name": "linken",
   "version": "0.2.0",
   "description": "Post, comment and reply on LinkedIn from Claude, behind a macOS approval dialog; triage your inbox and clean up connections from your own data export.",
   "author": { "name": "Colorado Startups" },
   "homepage": "https://github.com/Colorado-Startups/link",
   "repository": "https://github.com/Colorado-Startups/link",
   "license": "Apache-2.0",
+  "displayName": "Linken",
   "keywords": ["linkedin", "mcp"],
   "mcpServers": {
-    "link": {
+    "linken": {
       "command": "node",
       "args": ["${CLAUDE_PLUGIN_ROOT}/src/server.ts"],
       "env": {

@@ -90,7 +90,7 @@ export function field(json: unknown, key: string): string | null {
   return typeof value === 'string' && value !== '' ? value : null;
 }
 
-/** The headers Link sets on every api.linkedin.com call. The helper adds Authorization. */
+/** The headers Linken sets on every api.linkedin.com call. The helper adds Authorization. */
 export function apiHeaders(hasBody: boolean): Record<string, string> {
   return {
     'Linkedin-Version': API_VERSION,
