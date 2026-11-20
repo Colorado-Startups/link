@@ -24,7 +24,7 @@ import { publishPost } from './publish.ts';
 
 const Tier = z.enum(['PROTECTED', 'KEEP', 'REVIEW', 'REMOVE']);
 
-const VERSION = '0.2.0';
+const VERSION = '0.3.0';
 
 const PostInput = z.strictObject({
   text: z
