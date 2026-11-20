@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// The launcher (trusted/link-linkedin): it must never put the token on a command line, where `ps` shows it to every
+// The launcher (trusted/linken-linkedin): it must never put the token on a command line, where `ps` shows it to every
 // local process. It hands the token to Node through a pipe on fd 3 (a here-document, read with --env-file), and keeps
 // `env -i`, so Node starts with HOME and the token and nothing else. The runtime tests run a temporary copy of the
 // launcher in which only its two absolute paths are swapped: this Node, and a probe script in place of the helper.
@@ -12,11 +12,11 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { tempDir } from './fake-linkedin.ts';
 
-const LAUNCHER = fileURLToPath(new URL('../trusted/link-linkedin', import.meta.url));
+const LAUNCHER = fileURLToPath(new URL('../trusted/linken-linkedin', import.meta.url));
 const PROBE = fileURLToPath(new URL('./fixtures/launcher-probe.mjs', import.meta.url));
 const VAR = 'LINKEDIN_ACCESS_TOKEN';
 const NODE_IN_LAUNCHER = '/opt/homebrew/bin/node';
-const HELPER_IN_LAUNCHER = '/usr/local/lib/link/link-linkedin.mjs';
+const HELPER_IN_LAUNCHER = '/usr/local/lib/link/linken-linkedin.mjs';
 /** A fake token with every kind of character the launcher lets through. */
 const FAKE_TOKEN = 'AQX.fake_token:for+tests/0123456789=-';
 const NO_DASH = existsSync('/bin/dash') ? false : '/bin/dash is missing on this machine';
@@ -60,7 +60,7 @@ function stage(): { launcher: string; ran: string } {
   for (const path of [NODE_IN_LAUNCHER, HELPER_IN_LAUNCHER]) {
     assert.equal(text.split(path).length - 1, 1, `${path} appears once in the launcher`);
   }
-  const launcher = join(dir, 'link-linkedin');
+  const launcher = join(dir, 'linken-linkedin');
   writeFileSync(launcher, text.replace(NODE_IN_LAUNCHER, process.execPath).replace(HELPER_IN_LAUNCHER, probe));
   return { launcher, ran: join(dir, 'ran') };
 }

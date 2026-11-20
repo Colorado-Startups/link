@@ -1,11 +1,11 @@
 # The trusted helper
 
-`link-linkedin` is the one program that uses the LinkedIn token and shows the approval dialog. Threats and controls: [THREAT-MODEL.md](../THREAT-MODEL.md).
+`linken-linkedin` is the one program that uses the LinkedIn token and shows the approval dialog. Threats and controls: [THREAT-MODEL.md](../THREAT-MODEL.md).
 
 ```mermaid
 flowchart LR
-  K[(Keychain)] -->|token| L[launcher<br/>shape check, env -i] -->|fd 3| H[link-linkedin.mjs]
-  S[Link server] -->|spec on stdin| H
+  K[(Keychain)] -->|token| L[launcher<br/>shape check, env -i] -->|fd 3| H[linken-linkedin.mjs]
+  S[Linken server] -->|spec on stdin| H
   H -->|dialog: Publish?| A[api.linkedin.com]
   H -->|result on stdout, no token| S
 ```
@@ -21,9 +21,9 @@ flowchart LR
 
 | Source | Target | Mode |
 | --- | --- | --- |
-| [link-linkedin](link-linkedin) (the launcher) | `/usr/local/bin/link-linkedin` | root 755 |
-| [link-linkedin.mjs](link-linkedin.mjs) | `/usr/local/lib/link/link-linkedin.mjs` | root 644 |
-| [link-token](link-token) (hidden dialog → Keychain) | `/usr/local/bin/link-token` | root 755 |
+| [linken-linkedin](linken-linkedin) (the launcher) | `/usr/local/bin/linken-linkedin` | root 755 |
+| [linken-linkedin.mjs](linken-linkedin.mjs) | `/usr/local/lib/link/linken-linkedin.mjs` | root 644 |
+| [linken-token](linken-token) (hidden dialog → Keychain) | `/usr/local/bin/linken-token` | root 755 |
 
 `install.sh` refuses a Node the member can write. The launcher refuses a token outside `A-Za-z0-9._:+/=-` (exit 4); its other checks are under Guarantees.
 

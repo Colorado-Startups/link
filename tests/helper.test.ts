@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: Apache-2.0
-// The trusted helper (trusted/link-linkedin.mjs): the one program that holds the token and the approval dialog.
+// The trusted helper (trusted/linken-linkedin.mjs): the one program that holds the token and the approval dialog.
 // Every test passes a fake fetch, a fake approval and a fake execFile: no network, no dialog, no osascript.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { EXIT, Refused, askHuman, dialogArgs, needsApproval, run, shapeResult, validateSpec } from '../trusted/link-linkedin.mjs';
+import { EXIT, Refused, askHuman, dialogArgs, needsApproval, run, shapeResult, validateSpec } from '../trusted/linken-linkedin.mjs';
 
 const TOKEN = 'fake-token-for-tests';
-const HELPER = fileURLToPath(new URL('../trusted/link-linkedin.mjs', import.meta.url));
+const HELPER = fileURLToPath(new URL('../trusted/linken-linkedin.mjs', import.meta.url));
 const POST = {
   method: 'POST',
   url: 'https://api.linkedin.com/rest/posts',
@@ -197,7 +197,7 @@ test('the dialog arguments: a fixed script, then the message and the title as se
   assert.match(args[1], /giving up after 600/);
   assert.ok(args[2].endsWith(hostile), 'quotes, backslashes and newlines arrive unchanged');
   assert.ok(!args[2].startsWith('-') && !args[3].startsWith('-'), 'no argument can be read as an option');
-  assert.equal(args[3], 'Link: send this to LinkedIn?');
+  assert.equal(args[3], 'Linken: send this to LinkedIn?');
 });
 
 test('the dialog message names the request, the author, the media and the text with its length', () => {

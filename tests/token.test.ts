@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// trusted/link-token: the token reaches `security` on stdin only, a bad shape or a cancel stores nothing. Fake
+// trusted/linken-token: the token reaches `security` on stdin only, a bad shape or a cancel stores nothing. Fake
 // osascript and security; the real Keychain is never touched.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -9,8 +9,8 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { tempDir } from './fake-linkedin.ts';
 
-const SCRIPT = fileURLToPath(new URL('../trusted/link-token', import.meta.url));
-const MAC = process.platform === 'darwin' ? false : 'link-token runs on macOS only';
+const SCRIPT = fileURLToPath(new URL('../trusted/linken-token', import.meta.url));
+const MAC = process.platform === 'darwin' ? false : 'linken-token runs on macOS only';
 
 function run(answer: string | null) {
   const dir = tempDir();
@@ -29,7 +29,7 @@ test('a good token goes to security on stdin, never in its arguments', { skip: M
   const r = run('AQX-abc_123.def');
   assert.equal(r.status, 0);
   assert.equal(r.argv, '-i\n');
-  assert.equal(r.stdin, 'add-generic-password -U -s link-linkedin -a member -w AQX-abc_123.def\n');
+  assert.equal(r.stdin, 'add-generic-password -U -s linken-linkedin -a member -w AQX-abc_123.def\n');
 });
 
 test('a cancel, an empty answer or a bad character stores nothing', { skip: MAC }, () => {

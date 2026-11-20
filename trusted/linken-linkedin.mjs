@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
-// link-linkedin: the one program that holds the LinkedIn token. It reads ONE request spec as JSON on stdin, adds the
+// linken-linkedin: the one program that holds the LinkedIn token. It reads ONE request spec as JSON on stdin, adds the
 // token, asks the member in a macOS dialog before any write, sends the request to LinkedIn, and writes ONE JSON result
-// on stdout. The Link server and every other caller stay outside: they never see the token and cannot skip the dialog.
+// on stdout. The Linken server and every other caller stay outside: they never see the token and cannot skip the dialog.
 //
 // It is installed as root-owned files (trusted/README.md), so a session that can edit a repo checkout cannot change it.
 // Node built-ins only, and no import from the rest of the repo.
@@ -119,7 +119,7 @@ set answer to display dialog (item 1 of argv) with title (item 2 of argv) button
 if gave up of answer then return "gave up"
 return button returned of answer
 end run`;
-const DIALOG_TITLE = 'Link: send this to LinkedIn?';
+const DIALOG_TITLE = 'Linken: send this to LinkedIn?';
 
 /** Text made safe to show and to pass as an argument: control characters other than newline and tab are replaced. */
 function shown(value, limit = 300) {
