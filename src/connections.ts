@@ -50,6 +50,27 @@ export function connectionsList(input: { tier?: string; reason?: string; limit: 
   };
 }
 
+/** Writes the halt file: every LinkedIn action stops until a person deletes it. */
+function writeHalt(time: string, note: string | undefined, config: Config, env: Env): void {
+  const file = haltPath(env, config);
+  mkdirSync(dirname(file), { recursive: true, mode: 0o700 });
+  writeFileSync(file, `${time}\n${note ?? 'LinkedIn warning'}\n`, { mode: 0o600 });
+  chmodSync(file, 0o600);
+}
+
+/** Records one mark on its connection. A removal is final: a removed row refuses any later mark. */
+function markRow(input: { url: string; action: string; note?: string }, url: string, config: Config): void {
+  const rows = readConnections(config);
+  const c = rows.find((r) => r.url === url);
+  if (!c) throw new LinkError(`${input.url} is not in the loaded connections.`);
+  if (c.state === 'removed') throw new LinkError(`${input.url} is already removed; a removal is final.`);
+  if (input.action === 'keep') Object.assign(c, { mark: 'keep', tier: 'KEEP', reason: 'override', state: undefined });
+  else if (input.action === 'remove') Object.assign(c, { mark: 'remove', tier: 'REMOVE', reason: 'override', state: undefined });
+  else c.state = input.action as 'removed' | 'skipped';
+  if (input.note) c.note = input.note;
+  writeJson(connectionsFile(config), rows);
+}
+
 /** Records the owner's decision for one connection; a warning also writes the halt file. */
 export function connectionsMark(input: { url: string; action: string; note?: string }, config: Config, env: Env) {
   const time = new Date().toISOString();
@@ -57,22 +78,8 @@ export function connectionsMark(input: { url: string; action: string; note?: str
   if (!url && input.action !== 'warning') throw new LinkError('connections_mark needs a profile URL.');
   const all = events(config);
   all.push({ time, url, action: input.action, ...(input.note ? { note: input.note } : {}) });
-  if (input.action === 'warning') {
-    const file = haltPath(env, config);
-    mkdirSync(dirname(file), { recursive: true, mode: 0o700 });
-    writeFileSync(file, `${time}\n${input.note ?? 'LinkedIn warning'}\n`, { mode: 0o600 });
-    chmodSync(file, 0o600);
-  } else {
-    const rows = readConnections(config);
-    const c = rows.find((r) => r.url === url);
-    if (!c) throw new LinkError(`${input.url} is not in the loaded connections.`);
-    if (c.state === 'removed') throw new LinkError(`${input.url} is already removed; a removal is final.`);
-    if (input.action === 'keep') Object.assign(c, { mark: 'keep', tier: 'KEEP', reason: 'override', state: undefined });
-    else if (input.action === 'remove') Object.assign(c, { mark: 'remove', tier: 'REMOVE', reason: 'override', state: undefined });
-    else c.state = input.action as 'removed' | 'skipped';
-    if (input.note) c.note = input.note;
-    writeJson(connectionsFile(config), rows);
-  }
+  if (input.action === 'warning') writeHalt(time, input.note, config, env);
+  else markRow(input, url, config);
   writeJson(removalsFile(config), all);
   return { marked: input.action, url, halted: input.action === 'warning' };
 }
