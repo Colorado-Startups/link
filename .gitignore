@@ -1,4 +1,4 @@
-node_modules/
+node_modules
 # Rendered carousels and local data never belong in the repo.
 *.pdf
 .linken/
