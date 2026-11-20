@@ -59,7 +59,7 @@ test('the helper had no usable token (exit 4): the token does not work, and the 
   assert.equal(status.token_works, false);
   assert.equal(
     status.problem,
-    "The LinkedIn helper had no usable token. Generate one in LinkedIn's Token Generator and store it (about 1 minute), and check that LINK_HELPER_CMD starts the helper through the key tool.",
+    "The LinkedIn helper had no usable token. Generate one in LinkedIn's Token Generator and store it (about 1 minute), and check that LINKEN_HELPER_CMD starts the helper through the key tool.",
   );
 });
 
@@ -70,7 +70,7 @@ test('any other failure is an error, not a verdict on the token', async () => {
     assert.equal(error.message, 'LinkedIn returned 503 for GET api.linkedin.com/v2/userinfo. LinkedIn said: Service unavailable');
     return true;
   });
-  await assert.rejects(linkStatus(liveConfig(), helperTransport(undefined)), /^Error: LINK_HELPER_CMD is not set\./);
+  await assert.rejects(linkStatus(liveConfig(), helperTransport(undefined)), /^Error: LINKEN_HELPER_CMD is not set\./);
 });
 
 test('a dry run calls no transport and returns the one request', async () => {

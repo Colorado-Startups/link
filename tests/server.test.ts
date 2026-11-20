@@ -81,9 +81,9 @@ test('input the schema refuses is a tool error, and nothing is sent', async () =
   assert.equal(linkedin.calls.length, 0);
 });
 
-test('with LINK_HELPER_CMD unset, both tools return a tool error that names the fix', async () => {
+test('with LINKEN_HELPER_CMD unset, both tools return a tool error that names the fix', async () => {
   const fix =
-    'LINK_HELPER_CMD is not set. Set it to the command that starts the helper with the token, as a JSON array of strings, for example ["/bin/sh","-c","LINKEDIN_ACCESS_TOKEN=\\"$(/usr/bin/security find-generic-password -s link-linkedin -w)\\" exec /usr/local/bin/link-linkedin"].';
+    'LINKEN_HELPER_CMD is not set. Set it to the command that starts the helper with the token, as a JSON array of strings, for example ["/bin/sh","-c","LINKEDIN_ACCESS_TOKEN=\\"$(/usr/bin/security find-generic-password -s linken-linkedin -w)\\" exec /usr/local/bin/linken-linkedin"].';
   for (const [name, args] of [['link_status', {}], ['post_publish', { text: 'Hello' }]] as const) {
     const result = await call(liveConfig(), undefined, name, args);
     assert.equal(result.isError, true, name);

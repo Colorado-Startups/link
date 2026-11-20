@@ -48,7 +48,7 @@ export function tempDir(): string {
   return mkdtempSync(join(tmpdir(), 'link-test-'));
 }
 
-/** A live config with a fresh LINK_HOME that does not exist yet, no helper command and no gates. */
+/** A live config with a fresh LINKEN_HOME that does not exist yet, no helper command and no gates. */
 export function liveConfig(): Config {
   return { helper: undefined, dryRun: false, home: join(tempDir(), 'home'), gates: undefined, gatePrefix: 'mcp__link__' };
 }

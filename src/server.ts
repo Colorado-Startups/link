@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 // The Link MCP server over stdio. link_status reads; post_publish and comment_create write to LinkedIn as the
-// signed-in member. Every request goes through a transport, by default the command in LINK_HELPER_CMD, which starts the trusted
+// signed-in member. Every request goes through a transport, by default the command in LINKEN_HELPER_CMD, which starts the trusted
 // helper. The helper receives the token from the process that starts it. In the supported setup that is a key tool,
 // so the token goes from the Keychain to the key tool to the helper and never enters this server. Two rules hold in
 // the code. Every tool handler first calls refuseToken: with a non-empty LINKEDIN_ACCESS_TOKEN in the server's own
@@ -92,7 +92,7 @@ function registerPostTools({ server, config, transport, env }: Deps): void {
     {
       title: 'Link status',
       description:
-        "Checks the LinkedIn connection with one read call (GET /v2/userinfo), sent through the trusted helper. Returns the member's name, the author URN (urn:li:person:{sub}), whether the token works, the pinned LinkedIn API version, whether dry-run is on, and the last 5 ledger lines. With LINK_DRY_RUN=1 it sends nothing and returns the request it would send. It publishes nothing and returns no token.",
+        "Checks the LinkedIn connection with one read call (GET /v2/userinfo), sent through the trusted helper. Returns the member's name, the author URN (urn:li:person:{sub}), whether the token works, the pinned LinkedIn API version, whether dry-run is on, and the last 5 ledger lines. With LINKEN_DRY_RUN=1 it sends nothing and returns the request it would send. It publishes nothing and returns no token.",
       inputSchema: z.strictObject({}),
       annotations: { readOnlyHint: true },
     },
@@ -104,7 +104,7 @@ function registerPostTools({ server, config, transport, env }: Deps): void {
     {
       title: 'Publish a LinkedIn post',
       description:
-        'Publishes one post to LinkedIn as the signed-in member: text alone, or text with one image or one PDF document. The pre-publish gates, when any are set, run first and can block the post. The trusted helper then shows the member the post in a dialog and sends it only on a yes. Returns the post URN and its URL, and appends one line to the local ledger. With LINK_DRY_RUN=1 it sends nothing and returns the requests it would send, in order. It does not schedule, edit or delete posts, mention people or companies, post to a company page, or upload video.',
+        'Publishes one post to LinkedIn as the signed-in member: text alone, or text with one image or one PDF document. The pre-publish gates, when any are set, run first and can block the post. The trusted helper then shows the member the post in a dialog and sends it only on a yes. Returns the post URN and its URL, and appends one line to the local ledger. With LINKEN_DRY_RUN=1 it sends nothing and returns the requests it would send, in order. It does not schedule, edit or delete posts, mention people or companies, post to a company page, or upload video.',
       inputSchema: PostInput,
       annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: true },
     },
@@ -125,7 +125,7 @@ function registerCommentTool({ server, config, transport, env, desk }: Deps): vo
     {
       title: 'Comment on a LinkedIn post',
       description:
-        'Comments on one post, or replies under one comment, as the signed-in member, through LinkedIn\'s /v2/socialActions endpoint. The pre-publish gates run first and can block it; the trusted helper then shows the comment in a dialog and sends it only on a yes. If LinkedIn refuses the endpoint (403), it and every later call put the text on the clipboard and open the post, for the member to paste and send. Stops while the halt file exists. With LINK_DRY_RUN=1 it sends nothing and returns the requests.',
+        'Comments on one post, or replies under one comment, as the signed-in member, through LinkedIn\'s /v2/socialActions endpoint. The pre-publish gates run first and can block it; the trusted helper then shows the comment in a dialog and sends it only on a yes. If LinkedIn refuses the endpoint (403), it and every later call put the text on the clipboard and open the post, for the member to paste and send. Stops while the halt file exists. With LINKEN_DRY_RUN=1 it sends nothing and returns the requests.',
       inputSchema: z.strictObject({
         post: z.string().min(1).describe('The post: its URN (urn:li:activity:..., urn:li:share:... or urn:li:ugcPost:...) or its URL. A comment or reply link from "Copy link to comment" also works: it replies under that comment, with no parent needed.'),
         text: z.string().min(1).max(1250).describe('The comment, as plain text, up to 1,250 characters.'),
@@ -149,7 +149,7 @@ function registerArchiveTools({ server, config, env }: Deps): void {
     {
       title: 'Load a LinkedIn data export',
       description:
-        'Reads a LinkedIn data export, the .zip or its unpacked folder, rates every connection with the rules in rules/rater.default.json plus the optional LINK_RATER overlay, and saves the result under LINK_HOME, with the message threads waiting on the member for inbox_next. A zip is unpacked into LINK_HOME/archive. Returns counts by tier and by reason and the export date range. A newer export keeps earlier marks and states. It does not contact LinkedIn and changes no connection.',
+        'Reads a LinkedIn data export, the .zip or its unpacked folder, rates every connection with the rules in rules/rater.default.json plus the optional LINKEN_RATER overlay, and saves the result under LINKEN_HOME, with the message threads waiting on the member for inbox_next. A zip is unpacked into LINKEN_HOME/archive. Returns counts by tier and by reason and the export date range. A newer export keeps earlier marks and states. It does not contact LinkedIn and changes no connection.',
       inputSchema: z.strictObject({ path: z.string().min(1).describe('Absolute path to the export .zip or to the unpacked folder.') }),
       annotations: { readOnlyHint: false, ...local },
     },
@@ -181,7 +181,7 @@ function registerConnectionTools({ server, config, env }: Deps): void {
     {
       title: 'Mark a connection',
       description:
-        'Records the owner\'s decision for one connection: keep or remove overrides the rating; removed or skipped records what happened when a person removed it or passed it by in LinkedIn; warning records a LinkedIn warning and writes the halt file named by LINK_HALT_FILE, which stops connections_next, post_publish, comment_create and reply_open. It removes nothing on LinkedIn.',
+        'Records the owner\'s decision for one connection: keep or remove overrides the rating; removed or skipped records what happened when a person removed it or passed it by in LinkedIn; warning records a LinkedIn warning and writes the halt file named by LINKEN_HALT_FILE, which stops connections_next, post_publish, comment_create and reply_open. It removes nothing on LinkedIn.',
       inputSchema: z.strictObject({
         url,
         action: z.enum(['keep', 'remove', 'removed', 'skipped', 'warning']).describe('keep or remove: override the rating. removed or skipped: the outcome. warning: LinkedIn showed a warning.'),
@@ -254,7 +254,7 @@ function registerInboxTools({ server, config, env, desk }: Deps): void {
     {
       title: 'Open a reply for you to send',
       description:
-        'Puts an approved reply on the clipboard and opens the thread in the browser, so you press Cmd+V, read it, and press Enter. It sends nothing: no browser automation and no API call. When the thread link is unknown it opens LinkedIn messaging and names who to search for. Stops while the halt file exists. With LINK_DRY_RUN=1 it copies and opens nothing.',
+        'Puts an approved reply on the clipboard and opens the thread in the browser, so you press Cmd+V, read it, and press Enter. It sends nothing: no browser automation and no API call. When the thread link is unknown it opens LinkedIn messaging and names who to search for. Stops while the halt file exists. With LINKEN_DRY_RUN=1 it copies and opens nothing.',
       inputSchema: z.strictObject({ thread, text: z.string().min(1).max(8000).describe('The reply, as plain text, after the member approved it.') }),
       annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: true },
     },

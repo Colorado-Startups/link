@@ -19,7 +19,7 @@ function setup(over: Parameters<typeof fakeLinkedIn>[0] = {}) {
   const fake = { copy: async (t: string) => void desk.push(`copy ${t}`), open: async (u: string) => void desk.push(`open ${u}`) };
   const halt = join(tempDir(), 'halt');
   const tool = async (args: Record<string, unknown>, cfg = config) => {
-    const r = await call(cfg, linkedin.transport, 'comment_create', args, { PATH: process.env.PATH, LINK_HALT_FILE: halt }, fake);
+    const r = await call(cfg, linkedin.transport, 'comment_create', args, { PATH: process.env.PATH, LINKEN_HALT_FILE: halt }, fake);
     return { isError: r.isError, text: r.content[0].text, json: r.isError ? undefined : JSON.parse(r.content[0].text) };
   };
   return { linkedin, config, desk, halt, tool };

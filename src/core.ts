@@ -20,26 +20,26 @@ export class LinkError extends Error {
 
 /** What the server reads from its environment. None of it is a secret. */
 export interface Config {
-  /** LINK_HELPER_CMD: the command that runs the trusted helper, as a JSON array of strings. */
+  /** LINKEN_HELPER_CMD: the command that runs the trusted helper, as a JSON array of strings. */
   helper: string | undefined;
-  /** LINK_DRY_RUN=1: no helper call and no ledger line. */
+  /** LINKEN_DRY_RUN=1: no helper call and no ledger line. */
   dryRun: boolean;
-  /** LINK_HOME, default ~/.link: the folder that holds the ledger. */
+  /** LINKEN_HOME, default ~/.linken: the folder that holds the ledger. */
   home: string;
-  /** LINK_GATES: the pre-publish gate commands, as a JSON array of argument arrays (src/gates.ts). */
+  /** LINKEN_GATES: the pre-publish gate commands, as a JSON array of argument arrays (src/gates.ts). */
   gates: string | undefined;
-  /** LINK_GATE_TOOL_PREFIX, default mcp__link__: what a gate sees before the tool's name. */
+  /** LINKEN_GATE_TOOL_PREFIX, default mcp__link__: what a gate sees before the tool's name. */
   gatePrefix: string;
 }
 
 /** The Config an environment describes: each LINK_ variable, with the defaults for the ones that are unset. */
 export function configFrom(env: Record<string, string | undefined>): Config {
   return {
-    helper: env.LINK_HELPER_CMD || undefined,
-    dryRun: env.LINK_DRY_RUN === '1',
-    home: env.LINK_HOME || join(homedir(), '.link'),
-    gates: env.LINK_GATES || undefined,
-    gatePrefix: env.LINK_GATE_TOOL_PREFIX ?? 'mcp__link__',
+    helper: env.LINKEN_HELPER_CMD || undefined,
+    dryRun: env.LINKEN_DRY_RUN === '1',
+    home: env.LINKEN_HOME || join(homedir(), '.linken'),
+    gates: env.LINKEN_GATES || undefined,
+    gatePrefix: env.LINKEN_GATE_TOOL_PREFIX ?? 'mcp__link__',
   };
 }
 

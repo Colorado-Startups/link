@@ -31,15 +31,15 @@ Skills that drive each job: [link-post](skills/link-post/SKILL.md), [link-inbox]
 | The server never holds the token | Every tool errors if `LINKEDIN_ACCESS_TOKEN` is in its environment |
 | Only a root-owned helper uses it, through a pipe | [trusted/](trusted/README.md), [THREAT-MODEL.md](THREAT-MODEL.md) |
 | No caller can skip the dialog | The helper asks, not the server |
-| Each post appends a line to `~/.link/ledger.jsonl` | Owner-readable only |
+| Each post appends a line to `~/.linken/ledger.jsonl` | Owner-readable only |
 
 ## Install
 
 | Way | Do |
 | --- | --- |
 | Claude Code or Cowork | `/plugin install link --marketplace Colorado-Startups/link` |
-| By hand, any host | Node 26 or newer, `npm ci`, then [docs/setup.md](docs/setup.md): `sudo ./install.sh`, a LinkedIn app, `link-token`, one config block |
-| Rehearse | `LINK_DRY_RUN=1` returns the requests and sends nothing |
+| By hand, any host | Node 26 or newer, `npm ci`, then [docs/setup.md](docs/setup.md): `sudo ./install.sh`, a LinkedIn app, `linken-token`, one config block |
+| Rehearse | `LINKEN_DRY_RUN=1` returns the requests and sends nothing |
 
 ## Quality and process
 

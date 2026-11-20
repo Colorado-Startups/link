@@ -16,7 +16,7 @@ const SRC = fileURLToPath(new URL('../src/', import.meta.url));
 const fixture = (name: string) => fileURLToPath(new URL(`./fixtures/${name}`, import.meta.url));
 const EXCLUDED = ['LINKEDIN_ACCESS_TOKEN', 'NODE_OPTIONS', 'BASH_ENV', 'ENV'];
 const REFUSAL =
-  "LINKEDIN_ACCESS_TOKEN is set in the Link server's environment. The server must not hold the token. Remove it and let the helper command supply the token (for example a key tool that starts link-linkedin).";
+  "LINKEDIN_ACCESS_TOKEN is set in the Link server's environment. The server must not hold the token. Remove it and let the helper command supply the token (for example a key tool that starts linken-linkedin).";
 const TOOLS = [['link_status', {}], ['post_publish', { text: 'Hello' }]] as const;
 
 test('every place in src/ that starts a process passes childEnv(env) as its environment', () => {
@@ -69,7 +69,7 @@ test('a gate and the helper command see none of the token, NODE_OPTIONS, BASH_EN
     NODE_OPTIONS: '--no-warnings',
     BASH_ENV: '/nonexistent/bash-env',
     ENV: '/nonexistent/env',
-    LINK_TEST_OTHER: 'anything else the server has',
+    LINKEN_TEST_OTHER: 'anything else the server has',
   };
   const before = Object.fromEntries(Object.keys(added).map((name) => [name, process.env[name]]));
   Object.assign(process.env, added);
@@ -84,7 +84,7 @@ test('a gate and the helper command see none of the token, NODE_OPTIONS, BASH_EN
     const helperSaw = (await helperTransport(helper)(spec)).body as string[];
 
     for (const [who, names] of [['a gate', gateSaw], ['the helper command', helperSaw]] as const) {
-      for (const excluded of [...EXCLUDED, 'LINK_TEST_OTHER']) {
+      for (const excluded of [...EXCLUDED, 'LINKEN_TEST_OTHER']) {
         assert.ok(!names.includes(excluded), `${who} saw ${excluded}`);
       }
       assert.ok(names.includes('PATH'), `${who} still gets PATH`);

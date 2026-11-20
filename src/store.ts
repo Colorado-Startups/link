@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// The stored connections: LINK_HOME/connections.json, which archive_load writes and the connections and inbox tools
+// The stored connections: LINKEN_HOME/connections.json, which archive_load writes and the connections and inbox tools
 // read, and writeJson, which writes every owner-only JSON file. A leaf under rater.ts, so archive, inbox and
 // connections need not import each other.
 import { chmodSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
@@ -15,7 +15,7 @@ export interface Connection extends Row {
   reason: string;
 }
 
-/** The path of the stored connections, LINK_HOME/connections.json. */
+/** The path of the stored connections, LINKEN_HOME/connections.json. */
 export const connectionsFile = (config: Config) => join(config.home, 'connections.json');
 
 /** The stored connections, or a LinkError that says to run archive_load first. */

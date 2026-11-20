@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// The ledger: one JSON line per published post or comment, appended to LINK_HOME/ledger.jsonl and never rewritten. It holds what
+// The ledger: one JSON line per published post or comment, appended to LINKEN_HOME/ledger.jsonl and never rewritten. It holds what
 // was posted and where, never the token.
 import { createHash } from 'node:crypto';
 import { appendFileSync, mkdirSync, readFileSync } from 'node:fs';
