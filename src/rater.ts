@@ -43,6 +43,8 @@ export interface Row {
   started: boolean;
   /** An endorsement or recommendation either way. */
   endorsed: boolean;
+  /** The owner sent them the invitation: someone they chose. */
+  invited: boolean;
   /** They wrote first, with a pitch phrase. */
   pitchFirst: boolean;
   /** On a keep list. */
@@ -129,6 +131,7 @@ const RULES: Rule[] = [
   when((row) => row.mark === 'remove', 'REMOVE', 'override'), // 1
   when((row) => row.started || row.sent >= 2, 'PROTECTED', 'thread'), // 2
   when((row) => row.endorsed, 'PROTECTED', 'endorsed'), // 3
+  when((row) => row.invited, 'PROTECTED', 'invited'), // 3b: you sent the invitation
   when((row) => row.keep, 'PROTECTED', 'keeplist'), // 4
   when((row, rules, days) => days <= rules.new_days && !row.pitchFirst, 'PROTECTED', 'new'), // 5
   when((row) => row.pitchFirst && row.sent === 0, 'REMOVE', 'pitch'), // 6
