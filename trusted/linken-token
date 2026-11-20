@@ -9,4 +9,4 @@ TOKEN="$("${LINKEN_OSASCRIPT:-/usr/bin/osascript}" -e "$ASK" -e 'text returned o
 case "$TOKEN" in ''|*[!A-Za-z0-9._:+/=-]*) echo "That is not a LinkedIn token: nothing stored." >&2; exit 4 ;; esac
 case "$USER" in ''|*[!A-Za-z0-9._-]*) echo "Unsupported user name: nothing stored." >&2; exit 1 ;; esac
 printf 'add-generic-password -U -s linken-linkedin -a %s -w %s\n' "$USER" "$TOKEN" | "${LINKEN_SECURITY:-/usr/bin/security}" -i >/dev/null
-echo "Stored. Ask Claude to call link_status."
+echo "Stored. Ask Claude to call linken_status."
