@@ -35,7 +35,7 @@ flowchart TD
 | On the page | Always wins |
 |---|---|
 | A `places` word in the location or company | SKIP, even over your own remove mark |
-| A `mission` word in the headline or company | SKIP, except for a pitch or your mark |
+| A `mission` word in the headline or company | SKIP, except over your own remove mark. A keep word beats a pitch |
 | Name differs, or not 1st degree | SKIP |
 
 Keep words are yours. A startup-community overlay could start with:

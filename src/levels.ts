@@ -21,6 +21,8 @@ export function levelOf(c: Row & Rating, rules: Rules): [Level, string] {
   if (!c.url) return ['nolink', 'no profile link in the export'];
   if (c.tier === 'PROTECTED' || c.tier === 'KEEP') return ['core', c.reason];
   if (c.reason === 'override') return ['spam', 'your remove mark'];
+  // A keep word or place beats a pitch and a sales title: the rater checks those first, but a founder who pitched is still a founder.
+  if (hasWord(`${c.position} ${c.company}`, [...rules.mission, ...rules.places])) return ['core', 'mission or place words'];
   if (c.reason === 'pitch') return ['spam', 'pitched you, never answered'];
   if (hasWord(c.position, rules.spam_titles) || hasWord(c.company, rules.spam_companies)) return ['spam', 'spam title or freelance site'];
   if (c.reason === 'empty') return ['borderline', 'empty in the export'];
@@ -30,10 +32,10 @@ export function levelOf(c: Row & Rating, rules: Rules): [Level, string] {
 
 const blank = (s: string | undefined) => (s ?? '').replace(/[-–—.\s]/g, '').length < 3;
 
-/** Why the live page keeps this connection, or undefined. A place keeps anyone; keep words keep all but pitches and marks. */
+/** Why the live page keeps this connection, or undefined. A place keeps anyone; keep words keep all but your own remove mark. */
 export function keptBy(c: Row & Rating, live: Live, rules: Rules): string | undefined {
   if (hasWord(`${live.location ?? ''} ${live.company ?? ''}`, rules.places)) return 'rescue place on the page';
-  if (!['pitch', 'override'].includes(c.reason) && hasWord(`${live.headline} ${live.company ?? ''}`, rules.mission)) return 'mission words on the page';
+  if (c.reason !== 'override' && hasWord(`${live.headline} ${live.company ?? ''}`, rules.mission)) return 'mission words on the page';
   return undefined;
 }
 
