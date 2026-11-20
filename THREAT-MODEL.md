@@ -1,6 +1,6 @@
 # Threat model
 
-The one asset is the member's LinkedIn token, and with it the power to post as them. Reviewed 2026-11-19.
+The one asset is the member's LinkedIn token, and with it the power to post as them. Reviewed 2026-11-20.
 
 ```mermaid
 flowchart LR
