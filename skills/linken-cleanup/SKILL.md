@@ -5,7 +5,7 @@ description: Rate and clean up LinkedIn connections with the Linken MCP server, 
 
 # Clean up LinkedIn connections
 
-LinkedIn has no API to remove a connection. Linken rates and paces; the member removes each one in LinkedIn.
+LinkedIn has no API to remove a connection. Linken rates and paces; the member removes each one in LinkedIn. The aim is to keep every contact who matters: clear spam goes first, borderline only on live proof, and core and low are never removed. The decision model, drawn: `docs/connections.md`, "How Linken decides".
 
 ```mermaid
 flowchart LR
@@ -19,8 +19,8 @@ flowchart LR
 | 0. Try it | `npm run sample` writes a fictional export to `~/.linken-sample`; `archive_load` it, then `connections_summary` |
 | 1. Load | `archive_load` with the full export (Connections.csv is not in the fast one) |
 | 2. Review | `connections_list` by tier and reason; `connections_mark` `keep` or `remove` to override |
-| 3. Next | `connections_next` returns one, after its caps and wait |
-| 4. Check | Open the profile; pass what it shows to `connections_check` |
+| 3. Next | `connections_next` returns one, spam first, then borderline, after its caps and wait |
+| 4. Check | Open the profile; pass exactly what the top card shows to `connections_check`: name, degree, headline, location, current company, and mutual connections (0 when none show). Never guess a field |
 | 5. Remove | On REMOVE the member opens More, Remove connection, then you `connections_mark` `removed` |
 
 ## The Connections-list lane
@@ -60,4 +60,5 @@ flowchart TD
 | --- | --- |
 | Any LinkedIn warning: `connections_mark` `warning` at once | It writes the halt file, which stops removals, posts, comments and replies |
 | Never remove without a REMOVE from `connections_check` | The rating can be stale |
+| When the page shows someone who clearly matters, skip, even on REMOVE | Keeping a contact costs nothing; a wrong removal costs the relationship |
 | Removal is silent to the other person, but deletes endorsements and recommendations between you | Say so before the first one |
