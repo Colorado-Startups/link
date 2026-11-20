@@ -29,7 +29,7 @@ test('rows with no URL are REVIEW no_url, REMOVE rows are unchanged, and one sta
   const { dir, tool } = setup([
     `Ann,Blank,,,Acme,Analyst,1 Jan 2020`,
     `Bob,Blank,,,Acme,Analyst,1 Jan 2020`,
-    `Cy,Sales,${URL_OF('cy')},,Acme,Sales Manager,1 Jan 2020`,
+    `Cy,Sales,${URL_OF('cy')},,Acme Outsourcing,Sales Manager,1 Jan 2020`,
   ]);
   const out = (await tool('archive_load', { path: dir })).json;
   assert.equal(out.by_reason.no_url, 2);
