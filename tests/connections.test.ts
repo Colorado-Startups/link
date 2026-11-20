@@ -21,7 +21,7 @@ const NOW = new Date('2026-11-13T12:00:00Z');
 const RULES: Rules = { new_days: 90, low_days: 365, pitch: [], sales: ['sales'], mission: ['fusion'], places: ['denver'], keep_files: [] };
 const row = (over: Partial<Row>): Row => ({
   first: 'Ada', last: 'Example', url: 'https://www.linkedin.com/in/example-ada', email: '', company: 'Acme', position: 'Analyst',
-  connected: '2024-01-01', sent: 0, received: 0, started: false, endorsed: false, pitchFirst: false, keep: false, ...over,
+  connected: '2024-01-01', sent: 0, received: 0, started: false, endorsed: false, invited: false, pitchFirst: false, keep: false, ...over,
 });
 
 test('the rater: one case per rule, first match wins', () => {
@@ -31,6 +31,7 @@ test('the rater: one case per rule, first match wins', () => {
     ['2 started a thread', { started: true, pitchFirst: true }, 'PROTECTED', 'thread'],
     ['2 sent two messages', { sent: 2 }, 'PROTECTED', 'thread'],
     ['3 endorsed', { endorsed: true, position: 'Sales' }, 'PROTECTED', 'endorsed'],
+    ['3b invited', { invited: true, position: 'Sales' }, 'PROTECTED', 'invited'],
     ['4 keep list', { keep: true, position: 'Sales' }, 'PROTECTED', 'keeplist'],
     ['5 new', { connected: '2026-10-20', position: 'Sales' }, 'PROTECTED', 'new'],
     ['5 new but pitching', { connected: '2026-10-20', pitchFirst: true }, 'REMOVE', 'pitch'],
@@ -142,6 +143,15 @@ test('archive_load reads a zip with /usr/bin/unzip into LINKEN_HOME/archive', { 
   assert.equal((await tool('archive_load', { path: zip })).json.connections, 9);
   assert.ok(existsSync(join(config.home, 'archive', 'Basic_LinkedInDataExport', 'Connections.csv')));
   assert.equal(statSync(join(config.home, 'archive')).mode & 0o777, 0o700);
+});
+
+test('archive_load protects anyone the owner invited, by profile link or by name', async () => {
+  const { tool } = setup();
+  const dir = join(tempDir(), 'export');
+  mkdirSync(dir, { recursive: true });
+  writeFileSync(join(dir, 'Connections.csv'), `First Name,Last Name,URL,Email Address,Company,Position,Connected On\nIvy,Invited,${URL_OF('ivy')},,Acme,Sales Manager,${ago(800)}\nNed,Named,${URL_OF('ned')},,Acme,Sales Manager,${ago(800)}\nSol,Sales,${URL_OF('sol')},,Acme,Sales Manager,${ago(800)}\n`);
+  writeFileSync(join(dir, 'Invitations.csv'), `From,To,Sent At,Message,Direction,inviterProfileUrl,inviteeProfileUrl\nOlive,Ivy Invited,"1/1/26, 1:00 AM",,OUTGOING,${URL_OF('olive')},${URL_OF('ivy')}\nOlive,Ned Named,"1/1/26, 1:00 AM",,OUTGOING,,\nSol Sales,Olive,"1/1/26, 1:00 AM",,INCOMING,${URL_OF('sol')},${URL_OF('olive')}\n`);
+  assert.deepEqual((await tool('archive_load', { path: dir })).json.by_reason, { invited: 2, sales: 1 });
 });
 
 test('a missing Connections.csv is a tool error', async () => {

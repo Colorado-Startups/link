@@ -8,7 +8,7 @@ import { loadRules, type Rating, type Row } from '../src/rater.ts';
 const RULES = { ...loadRules({}), mission: ['founder', 'investor'], places: ['springfield'] };
 const row = (over: Partial<Row & Rating>): Row & Rating => ({
   first: 'Ada', last: 'Example', url: 'https://www.linkedin.com/in/example-ada', email: '', company: 'Acme', position: 'Analyst',
-  connected: '2020-01-01', sent: 0, received: 0, started: false, endorsed: false, pitchFirst: false, keep: false,
+  connected: '2020-01-01', sent: 0, received: 0, started: false, endorsed: false, invited: false, pitchFirst: false, keep: false,
   tier: 'REMOVE', reason: 'low', ...over,
 });
 
