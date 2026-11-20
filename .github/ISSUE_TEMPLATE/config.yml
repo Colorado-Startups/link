@@ -2,8 +2,8 @@
 blank_issues_enabled: false
 contact_links:
   - name: An idea
-    url: https://github.com/Colorado-Startups/link/discussions/categories/ideas
+    url: https://github.com/Colorado-Startups/linken/discussions/categories/ideas
     about: Start in Discussions; an accepted idea becomes an issue.
   - name: Security vulnerability
-    url: https://github.com/Colorado-Startups/link/security/advisories/new
+    url: https://github.com/Colorado-Startups/linken/security/advisories/new
     about: Report it privately. Do not open a public issue.

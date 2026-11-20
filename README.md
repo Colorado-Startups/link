@@ -1,53 +1,48 @@
-# Link
+# Linken
 
-A local MCP server that lets Claude post and comment on LinkedIn for you, through LinkedIn's official API, with every write approved by you in a macOS dialog. macOS only. Not affiliated with LinkedIn or Anthropic.
+<!-- hero: docs/linken-mascot.jpg added when the owner picks a render -->
 
-Brand: [Colorado Startups brand guide](https://colorado-startups.github.io/brand/)
+Your LinkedIn, run by Claude. Nothing posts until you click.
+
+| ✍️ Post | 📥 Inbox | 🧹 Clean up |
+| --- | --- | --- |
+| Posts, comments and replies you approve | Drafts replies from your own data export | Rates connections and paces the pruning |
 
 ```mermaid
 flowchart LR
-  C[Claude] -->|tool call| L[Link server]
-  L -->|request, no token| T[trusted helper]
-  K[(Keychain)] -->|token| T
-  T -->|you click Publish| A[LinkedIn API]
+  A[🤖 Your AI tool] --> B[📝 Draft]
+  B --> C{👤 You approve?}
+  C -->|yes| D[✅ LinkedIn API]
+  C -->|no| E[🛑 Nothing sent]
 ```
-
-## What it does
-
-| # | Job | Tools | How far LinkedIn lets it go |
-| --- | --- | --- | --- |
-| 1 | Post | `post_publish`: text, a link, one image or a PDF carousel | Full |
-| 2 | Comment and reply | `comment_create`: a post link, or a "Copy link to comment" link to reply | Full; if LinkedIn refuses the endpoint, the text goes to your clipboard |
-| 3 | Messages | `archive_load`, `inbox_next`, `inbox_mark`, `reply_open` | No messaging API: Link drafts from your data export, you press Enter |
-| 4 | Connections | `connections_list`, `_mark`, `_next`, `_check` | No removal API: Link rates and paces, you remove |
-| | Status | `linken_status` | Token, API version, last 5 ledger lines |
-
-Skills that drive each job: [linken-post](skills/linken-post/SKILL.md), [linken-inbox](skills/linken-inbox/SKILL.md), [linken-cleanup](skills/linken-cleanup/SKILL.md).
-
-## Safety
-
-| Rule | Enforced by |
-| --- | --- |
-| The server never holds the token | Every tool errors if `LINKEDIN_ACCESS_TOKEN` is in its environment |
-| Only a root-owned helper uses it, through a pipe | [trusted/](trusted/README.md), [THREAT-MODEL.md](THREAT-MODEL.md) |
-| No caller can skip the dialog | The helper asks, not the server |
-| Each post appends a line to `~/.linken/ledger.jsonl` | Owner-readable only |
 
 ## Install
 
-| Way | Do |
+| # | Do |
 | --- | --- |
-| Claude Code or Cowork | `/plugin install link --marketplace Colorado-Startups/link` |
-| By hand, any host | Node 26 or newer, `npm ci`, then [docs/setup.md](docs/setup.md): `sudo ./install.sh`, a LinkedIn app, `linken-token`, one config block |
-| Rehearse | `LINKEN_DRY_RUN=1` returns the requests and sends nothing |
+| 1️⃣ | `/plugin install linken --marketplace Colorado-Startups/linken` |
+| 2️⃣ | Make a LinkedIn app and a token: [setup](docs/setup.md) |
+| 3️⃣ | Ask Claude to call `linken_status` |
 
-## Quality and process
+## 🛡️ Safety
 
-| Page | Link |
+| Guard | How |
 | --- | --- |
-| Quality, Speed and Consumption | <https://colorado-startups.github.io/link/> |
-| Process | <https://colorado-startups.github.io/link/process.html> |
+| 👤 Approval dialog | Every post waits for your click |
+| 🛑 Halt file | Create `~/.linken/halt` and actions stop |
+| ⏱️ Pace caps | A daily cap and random gaps |
+| 🏠 Data stays on your Mac | Token in the Keychain, ledger in `~/.linken` |
+| 🚫 Removes nothing itself | You remove connections by hand |
 
-`npm test` runs in CI against a fake LinkedIn and a fake helper: no token, no network, no dialog.
+## Links
 
-[CONTRIBUTING](CONTRIBUTING.md) · [SECURITY](SECURITY.md) · [SUPPORT](SUPPORT.md) · [GOVERNANCE](GOVERNANCE.md) · Apache-2.0 ([LICENSE](LICENSE), [NOTICE](NOTICE)). Each person who runs Link creates their own LinkedIn app and is the developer under LinkedIn's API Terms.
+| Page | Where |
+| --- | --- |
+| 📊 Quality | <https://colorado-startups.github.io/linken/> |
+| ⚙️ Process | <https://colorado-startups.github.io/linken/process.html> |
+| 🔧 Setup | [docs/setup.md](docs/setup.md) |
+| 🔌 Connections guide | [docs/connections.md](docs/connections.md) |
+| ™️ Trademarks | [TRADEMARKS.md](TRADEMARKS.md) |
+| 📜 License | [Apache-2.0](LICENSE) |
+
+Linken is an open-source AI agent project from Colorado Startups. It runs in your own AI tool. Check its work before anything posts. Not affiliated with LinkedIn or Anthropic.

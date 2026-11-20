@@ -11,10 +11,10 @@ flowchart LR
 
 | You have | Do |
 |---|---|
-| An idea | Open a [Discussion in Ideas](https://github.com/Colorado-Startups/link/discussions/categories/ideas) |
+| An idea | Open a [Discussion in Ideas](https://github.com/Colorado-Startups/linken/discussions/categories/ideas) |
 | A bug | Open an issue with the bug form |
 | A security problem | [`SECURITY.md`](SECURITY.md); never a public issue |
-| Time now | Pick a [`good first issue`](https://github.com/Colorado-Startups/link/labels/good%20first%20issue) |
+| Time now | Pick a [`good first issue`](https://github.com/Colorado-Startups/linken/labels/good%20first%20issue) |
 
 ## 2. Run it
 

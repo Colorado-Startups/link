@@ -4,7 +4,7 @@
 
 | Way | Use it for |
 |---|---|
-| [Report a vulnerability](https://github.com/Colorado-Startups/link/security/advisories/new) (GitHub private reporting) | Anything in this repo |
+| [Report a vulnerability](https://github.com/Colorado-Startups/linken/security/advisories/new) (GitHub private reporting) | Anything in this repo |
 
 Please do not open a public issue. A maintainer replies.
 
