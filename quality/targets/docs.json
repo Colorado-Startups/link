@@ -44,6 +44,14 @@
           ]
         },
         {
+          "doc": ".claude/skills/bump-pins/SKILL.md",
+          "area": [
+            ".github/workflows/ci.yml",
+            ".github/workflows/pages.yml",
+            "quality/config.json"
+          ]
+        },
+        {
           "doc": "**",
           "area": [
             "{dir}/"
