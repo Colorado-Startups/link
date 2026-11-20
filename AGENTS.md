@@ -1,4 +1,4 @@
-# Link
+# Linken
 
 Instructions for every coding agent in this repo. OpenCode reads this file, and Claude Code reads it through `CLAUDE.md` ([OpenCode rules](https://opencode.ai/docs/rules), [Claude Code memory](https://code.claude.com/docs/en/memory), read 2026-11-13).
 

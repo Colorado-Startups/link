@@ -5,7 +5,7 @@ The one asset is the member's LinkedIn token, and with it the power to post as t
 ```mermaid
 flowchart LR
   subgraph U[member's account: can be changed by any process of theirs]
-    C[Claude] --> S[Link server<br/>src/, a checkout]
+    C[Claude] --> S[Linken server<br/>src/, a checkout]
   end
   subgraph R[root-owned: the member cannot change it]
     H[helper + launcher<br/>/usr/local] --> N[Node, not member-writable]
@@ -23,7 +23,7 @@ flowchart LR
 | A swapped Node reads the token | `install.sh` refuses a Node the member can write | issue #2, `install.sh` |
 | The token on a command line (`ps`) | Launcher: fd 3 here-document; `linken-token`: `security -i` stdin | `tests/launcher.test.ts`, `tests/token.test.ts` |
 | The token sent to another host | Host pinning; no redirects; 3 headers at most | `tests/helper.test.ts` |
-| A message in the inbox steers Claude | Message text is returned as quoted data; Link sends no message | `skills/linken-inbox` |
+| A message in the inbox steers Claude | Message text is returned as quoted data; Linken sends no message | `skills/linken-inbox` |
 | A fork's PR changes trusted code | `tools/merge_policy.json`: maintainer only | `CODEOWNERS` |
 | Member data committed to the public repo | A test fails on any non-`example-` profile link or export file in a tracked file | `tests/privacy.test.ts` |
 

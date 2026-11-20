@@ -15,4 +15,4 @@ flowchart LR
 | Report a security problem | [SECURITY.md](SECURITY.md), never a public issue |
 | Report conduct | [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) |
 | Contribute a change | [CONTRIBUTING.md](CONTRIBUTING.md) |
-| Learn how Link is set up | [docs/setup.md](docs/setup.md) |
+| Learn how Linken is set up | [docs/setup.md](docs/setup.md) |
