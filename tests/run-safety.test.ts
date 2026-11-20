@@ -41,7 +41,7 @@ const seeded = () => {
   const c = { first: 'Ann', last: 'Example', url: 'https://www.linkedin.com/in/example-ann', tier: 'REMOVE', reason: 'sales' };
   mkdirSync(config.home, { recursive: true });
   writeFileSync(join(config.home, 'connections.json'), JSON.stringify([c]));
-  const env = { PATH: process.env.PATH, HOME: process.env.HOME, LINKEN_GAP: '0-0', LINKEN_HALT_FILE: join(config.home, 'halt') };
+  const env = { PATH: process.env.PATH, HOME: process.env.HOME, LINKEN_HOME: config.home, LINKEN_GAP: '0-0', LINKEN_HALT_FILE: join(config.home, 'halt') };
   return { config, tool: (name: string, args: Record<string, unknown> = {}) => call(config, undefined, name, args, env) };
 };
 

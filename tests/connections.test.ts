@@ -4,7 +4,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { existsSync, mkdirSync, statSync, symlinkSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, statSync, symlinkSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { parseCsv, records } from '../src/csv.ts';
 import { gapRange, pace } from '../src/connections.ts';
@@ -55,6 +55,13 @@ test('a LINKEN_RATER overlay joins lists, replaces numbers and leaves the defaul
   assert.deepEqual([merged.mission, merged.places, merged.low_days], [['geothermal'], ['denver'], 200]);
   assert.ok(merged.sales.includes('recruiter'));
   assert.deepEqual(loadRules({}).mission, []);
+  const home = tempDir();
+  mkdirSync(join(home, '.linken'));
+  writeFileSync(join(home, '.linken', 'rater.json'), JSON.stringify({ mission: ['geothermal'] }));
+  assert.deepEqual(loadRules({ HOME: home }).mission, ['geothermal'], 'found in ~/.linken with no setting');
+  assert.deepEqual([loadRules({ HOME: home }).low_days, loadRules({ HOME: home, LINKEN_RATER: file }).low_days], [365, 200], 'LINKEN_RATER wins');
+  const starter = JSON.parse(readFileSync(new URL('../rules/starter.startups.json', import.meta.url), 'utf8'));
+  assert.ok(starter.mission.includes('founder') && starter.places.length === 0, 'starter: generic words, no places');
 });
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];

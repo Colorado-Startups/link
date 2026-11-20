@@ -3,7 +3,8 @@
 // Eleven rules (and a no_url guard before them), the first match wins. No AI and no network: the rules are word lists and counts. The generic word
 // lists ship in rules/rater.default.json; LINKEN_RATER names an optional overlay file merged on top (lists joined,
 // other values replaced). Keep lists are CSV files named in `keep_files`, matched on url, email or first and last name.
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { parseCsv } from './csv.ts';
 
 type Tier = 'PROTECTED' | 'KEEP' | 'REVIEW' | 'REMOVE';
@@ -82,11 +83,19 @@ export function hasWord(text: string, words: string[]): boolean {
 
 const DEFAULT = new URL('../rules/rater.default.json', import.meta.url);
 
-/** The default rules with the LINKEN_RATER overlay, when `env` names one, merged on top. */
+/** The overlay: LINKEN_RATER, else rater.json in the Linken folder (LINKEN_HOME, or ~/.linken from HOME) when it exists. */
+function overlayPath(env: Record<string, string | undefined>): string | undefined {
+  if (env.LINKEN_RATER) return env.LINKEN_RATER;
+  const home = env.LINKEN_HOME || (env.HOME ? join(env.HOME, '.linken') : '');
+  return home && existsSync(join(home, 'rater.json')) ? join(home, 'rater.json') : undefined;
+}
+
+/** The default rules with the member's overlay, when there is one, merged on top. */
 export function loadRules(env: Record<string, string | undefined>): Rules {
   const rules = JSON.parse(readFileSync(DEFAULT, 'utf8')) as Rules;
-  if (!env.LINKEN_RATER) return rules;
-  const overlay = JSON.parse(readFileSync(env.LINKEN_RATER, 'utf8')) as Record<string, unknown>;
+  const file = overlayPath(env);
+  if (!file) return rules;
+  const overlay = JSON.parse(readFileSync(file, 'utf8')) as Record<string, unknown>;
   for (const [key, value] of Object.entries(overlay)) {
     const old = (rules as unknown as Record<string, unknown>)[key];
     (rules as unknown as Record<string, unknown>)[key] = Array.isArray(old) && Array.isArray(value) ? [...old, ...value] : value;
