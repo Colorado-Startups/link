@@ -1,7 +1,5 @@
 # Linken
 
-<!-- hero: docs/linken-mascot.jpg added when the owner picks a render -->
-
 Your LinkedIn, run by Claude. Nothing posts until you click.
 
 | ✍️ Post | 📥 Inbox | 🧹 Clean up |
@@ -15,6 +13,14 @@ flowchart LR
   C -->|yes| D[✅ LinkedIn API]
   C -->|no| E[🛑 Nothing sent]
 ```
+
+## 🎒 Try it in 2 minutes
+
+| Step | Do |
+| --- | --- |
+| 1 | `npm run sample` |
+| 2 | Claude: `archive_load` `~/.linken-sample` |
+| 3 | `connections_summary` |
 
 ## Install
 
@@ -42,7 +48,6 @@ flowchart LR
 | ⚙️ Process | <https://colorado-startups.github.io/linken/process.html> |
 | 🔧 Setup | [docs/setup.md](docs/setup.md) |
 | 🔌 Connections guide | [docs/connections.md](docs/connections.md) |
-| ™️ Trademarks | [TRADEMARKS.md](TRADEMARKS.md) |
-| 📜 License | [Apache-2.0](LICENSE) |
+| 📜 Legal | [Apache-2.0](LICENSE), [trademarks](TRADEMARKS.md) |
 
-Linken is an open-source AI agent project from Colorado Startups. It runs in your own AI tool. Check its work before anything posts. Not affiliated with LinkedIn or Anthropic.
+Open source from Colorado Startups. Check its work before anything posts. Not affiliated with LinkedIn or Anthropic.
