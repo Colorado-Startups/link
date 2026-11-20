@@ -1,5 +1,7 @@
 # Linken
 
+<p align="center"><img src="docs/linken.jpg" alt="Linken, an elf hero in a LinkedIn-blue tunic" width="320"></p>
+
 Your LinkedIn, run by Claude. Nothing posts until you click.
 
 | ✍️ Post | 📥 Inbox | 🧹 Clean up |
