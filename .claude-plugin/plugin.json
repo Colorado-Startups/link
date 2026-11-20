@@ -1,6 +1,6 @@
 {
   "name": "linken",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Post, comment and reply on LinkedIn from Claude, behind a macOS approval dialog; triage your inbox and clean up connections from your own data export.",
   "author": { "name": "Colorado Startups" },
   "homepage": "https://github.com/Colorado-Startups/linken",
