@@ -2,6 +2,11 @@
 
 Instructions for every coding agent in this repo. OpenCode reads this file, and Claude Code reads it through `CLAUDE.md` ([OpenCode rules](https://opencode.ai/docs/rules), [Claude Code memory](https://code.claude.com/docs/en/memory), read 2026-11-13).
 
+```mermaid
+flowchart LR
+  B[🌿 Branch] --> P[📬 PR, DCO] --> C[✅ CI] --> R[🔎 Review at head] --> M[🔀 Squash merge]
+```
+
 | Topic | Rule |
 | --- | --- |
 | What this repo is | A local MCP server that lets Claude post and comment on LinkedIn behind an approval dialog, plus inbox and connection tools that read the member's own data export |

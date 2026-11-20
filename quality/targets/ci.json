@@ -1,0 +1,8 @@
+[
+  {
+    "id": "ci.skip_unchanged_share",
+    "goal": 40,
+    "near": 20,
+    "goal_source": "Linken, 2026-11-20: ci.yml runs on every change, because tests/privacy.test.ts must read every tracked file for member data; the pages pull_request and scorecard push triggers still skip unchanged work"
+  }
+]
