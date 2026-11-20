@@ -16,6 +16,7 @@ flowchart LR
 
 | Step | Do |
 | --- | --- |
+| 0. Try it | `npm run sample` writes a fictional export to `~/.linken-sample`; `archive_load` it, then `connections_summary` |
 | 1. Load | `archive_load` with the full export (Connections.csv is not in the fast one) |
 | 2. Review | `connections_list` by tier and reason; `connections_mark` `keep` or `remove` to override |
 | 3. Next | `connections_next` returns one, after its caps and wait |

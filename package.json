@@ -10,6 +10,7 @@
   },
   "scripts": {
     "start": "node src/server.ts",
+    "sample": "node tools/sample-export.mjs",
     "test": "node --test \"tests/**/*.test.ts\""
   },
   "dependencies": {
