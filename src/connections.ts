@@ -8,7 +8,7 @@ import { dirname, join } from 'node:path';
 import { LinkError, type Config } from './core.ts';
 import { connectionsFile, readConnections, readJson, writeJson, type Connection } from './store.ts';
 import { loadRules, normUrl } from './rater.ts';
-import { LEVEL_ORDER, levelOf, liveVerdict } from './levels.ts';
+import { levelOf, liveVerdict, queueLevels } from './levels.ts';
 
 type Env = Record<string, string | undefined>;
 interface Event {
@@ -66,6 +66,7 @@ export function connectionsMark(input: { url: string; action: string; note?: str
     const rows = readConnections(config);
     const c = rows.find((r) => r.url === url);
     if (!c) throw new LinkError(`${input.url} is not in the loaded connections.`);
+    if (c.state === 'removed') throw new LinkError(`${input.url} is already removed; a removal is final.`);
     if (input.action === 'keep') Object.assign(c, { mark: 'keep', tier: 'KEEP', reason: 'override', state: undefined });
     else if (input.action === 'remove') Object.assign(c, { mark: 'remove', tier: 'REMOVE', reason: 'override', state: undefined });
     else c.state = input.action as 'removed' | 'skipped';
@@ -116,7 +117,7 @@ export async function connectionsNext(config: Config, env: Env) {
   if (gap > 0) await new Promise((done) => setTimeout(done, gap));
   const rules = loadRules(env);
   const rows = readConnections(config).filter((c) => !c.state && c.url);
-  for (const level of LEVEL_ORDER) {
+  for (const level of queueLevels(rules)) {
     const c = rows.find((r) => levelOf(r, rules)[0] === level);
     if (c) {
       return { name: name(c), position: c.position, company: c.company, connected_on: c.connected, level, reason: c.reason, url: c.url, remaining_today: p.dailyCap - p.doneToday };
@@ -173,7 +174,7 @@ export function connectionsSummary(config: Config, env: Env) {
     by_reason: countOf(rows.map((c) => c.reason)),
     by_state: countOf(rows.flatMap((c) => (c.state ? [c.state] : []))),
     by_level: countOf(rows.filter((c) => !c.state).map((c) => levelOf(c, rules)[0])),
-    queue: rows.filter((c) => !c.state && c.url && LEVEL_ORDER.includes(levelOf(c, rules)[0])).length,
+    queue: rows.filter((c) => !c.state && c.url && queueLevels(rules).includes(levelOf(c, rules)[0])).length,
     today: { done: p.doneToday, cap: p.dailyCap },
     sitting: { done: p.doneSitting, cap: p.sittingCap },
     last_removed: all.findLast((e) => e.action === 'removed')?.time ?? null,
